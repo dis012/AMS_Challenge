@@ -10,27 +10,30 @@ from convex_adam_MIND_testset import *
 warnings.filterwarnings("ignore")
 
 
-def main(task_name, 
-        mind_r,
-        mind_d,
-        use_mask,
-        lambda_weight,
-        grid_sp,
-        disp_hw,
-        selected_niter,
-        selected_smooth,
-        data_dir,
-        result_path):
+def main(
+    task_name,
+    mind_r,
+    mind_d,
+    use_mask,
+    lambda_weight,
+    grid_sp,
+    disp_hw,
+    selected_niter,
+    selected_smooth,
+    data_dir,
+    result_path,
+):
+    task_dir = os.path.join(data_dir, task_name)
+    # dataset_json = os.path.join(task_dir, task_name + "_dataset.json")
+    # My custom dataset_json path
+    dataset_json = os.path.join(data_dir, "dataset.json")
 
-    task_dir = os.path.join(data_dir,task_name)
-    dataset_json = os.path.join(task_dir,task_name+'_dataset.json')
-    
-    with open(dataset_json, 'r') as f:
-             data = json.load(f)
-    val_pairs = data['registration_test']
-    
+    with open(dataset_json, "r") as f:
+        data = json.load(f)
+    val_pairs = data["registration_test"]
+
     # create save directory
-    save_paths = ['results_testset']
+    save_paths = ["results_testset"]
     for save_path in save_paths:
         new_path = os.path.join(result_path, task_name, save_path)
         isExist = os.path.exists(new_path)
@@ -43,49 +46,70 @@ def main(task_name,
             if item.endswith(".nii"):
                 os.remove(os.path.join(new_path, item))
 
-    
     case_times = torch.zeros(len(val_pairs))
-    ii=0
+    ii = 0
     for _, pair in enumerate(val_pairs):
-        path_fixed = os.path.join(task_dir, pair['fixed'])
-        path_moving = os.path.join(task_dir, pair['moving'])
+        # path_fixed = os.path.join(task_dir, pair["fixed"])
+        # path_moving = os.path.join(task_dir, pair["moving"])
+        # My custom path_fixed and path_moving
+        path_fixed = os.path.join(data_dir, pair["fixed"])
+        path_moving = os.path.join(data_dir, pair["moving"])
         img_fixed = torch.from_numpy(nib.load(path_fixed).get_fdata()).float()
         img_moving = torch.from_numpy(nib.load(path_moving).get_fdata()).float()
         if use_mask:
-            path_fixed_mask = os.path.join(task_dir, pair['fixed'].replace('images','masks'))
-            path_moving_mask = os.path.join(task_dir, pair['moving'].replace('images','masks'))
+            # path_fixed_mask = os.path.join(
+            #   task_dir, pair["fixed"].replace("images", "masks")
+            # )
+            # path_moving_mask = os.path.join(
+            #    task_dir, pair["moving"].replace("images", "masks")
+            # )
+            # My custom path_fixed_mask and path_moving_mask
+            path_fixed_mask = os.path.join(data_dir, pair["fixed_mask"])
+            path_moving_mask = os.path.join(data_dir, pair["moving_mask"])
             mask_fixed = torch.from_numpy(nib.load(path_fixed_mask).get_fdata()).float()
-            mask_moving = torch.from_numpy(nib.load(path_moving_mask).get_fdata()).float()
-        else: 
+            mask_moving = torch.from_numpy(
+                nib.load(path_moving_mask).get_fdata()
+            ).float()
+        else:
             mask_fixed = None
             mask_moving = None
 
-
-        displacements, case_time = convex_adam(img_fixed=img_fixed, 
-                                            img_moving=img_moving,
-                                            mind_r=mind_r,
-                                            mind_d=mind_d,
-                                            use_mask=use_mask,
-                                            mask_fixed=mask_fixed,
-                                            mask_moving=mask_moving,
-                                            lambda_weight=lambda_weight, 
-                                            grid_sp=grid_sp, 
-                                            disp_hw=disp_hw,
-                                            selected_niter=selected_niter,
-                                            selected_smooth=selected_smooth)
+        displacements, case_time = convex_adam(
+            img_fixed=img_fixed,
+            img_moving=img_moving,
+            mind_r=mind_r,
+            mind_d=mind_d,
+            use_mask=use_mask,
+            mask_fixed=mask_fixed,
+            mask_moving=mask_moving,
+            lambda_weight=lambda_weight,
+            grid_sp=grid_sp,
+            disp_hw=disp_hw,
+            selected_niter=selected_niter,
+            selected_smooth=selected_smooth,
+        )
 
         case_times[ii] = case_time
-        ii+=1
-        
+        ii += 1
+
         affine = nib.load(path_fixed).affine
 
-        disp_path = os.path.join(result_path, task_name, 'results_testset', 'disp_{}_{}'.format(pair['fixed'][-16:-12], pair['moving'][-16:-12]+'.nii.gz'))
+        disp_path = os.path.join(
+            result_path,
+            task_name,
+            "results_testset",
+            "disp_{}_{}".format(
+                pair["fixed"][-16:-12], pair["moving"][-16:-12] + ".nii.gz"
+            ),
+        )
         disp_nii = nib.Nifti1Image(displacements, affine)
         nib.save(disp_nii, disp_path)
 
     median_case_time = case_times.median().item()
-    print('median case time: ', median_case_time)
+    print("median case time: ", median_case_time)
 
+
+"""
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--task_name', type=str, required=True)
@@ -128,3 +152,4 @@ if __name__=="__main__":
         selected_smooth,
         data_dir,
         result_path)
+"""
