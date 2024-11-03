@@ -23,7 +23,9 @@ def main(task_name,
         result_path):
 
     task_dir = os.path.join(data_dir,task_name)
-    dataset_json = os.path.join(task_dir,task_name+'_dataset.json')
+    #dataset_json = os.path.join(task_dir,task_name+'_dataset.json')
+    # My custom dataset_json path
+    dataset_json = os.path.join(data_dir, "dataset.json")
     
     with open(dataset_json, 'r') as f:
              data = json.load(f)
@@ -47,13 +49,23 @@ def main(task_name,
     case_times = torch.zeros(len(val_pairs))
     ii=0
     for _, pair in enumerate(val_pairs):
-        path_fixed = os.path.join(task_dir, pair['fixed'])
-        path_moving = os.path.join(task_dir, pair['moving'])
+        #path_fixed = os.path.join(task_dir, pair['fixed'])
+        #path_moving = os.path.join(task_dir, pair['moving'])
+        #img_fixed = torch.from_numpy(nib.load(path_fixed).get_fdata()).float()
+        #img_moving = torch.from_numpy(nib.load(path_moving).get_fdata()).float()
+
+        path_fixed = os.path.join(data_dir, pair["fixed"])
+        path_moving = os.path.join(data_dir, pair["moving"])
         img_fixed = torch.from_numpy(nib.load(path_fixed).get_fdata()).float()
         img_moving = torch.from_numpy(nib.load(path_moving).get_fdata()).float()
 
-        path_fixed_pred = os.path.join(task_dir, pair['fixed'].replace('images','predictedlabels'))
-        path_moving_pred = os.path.join(task_dir, pair['moving'].replace('images','predictedlabels'))
+        #path_fixed_pred = os.path.join(task_dir, pair['fixed'].replace('images','predictedlabels'))
+        #path_moving_pred = os.path.join(task_dir, pair['moving'].replace('images','predictedlabels'))
+        #pred_fixed = torch.from_numpy(nib.load(path_fixed_pred).get_fdata()).float()
+        #pred_moving = torch.from_numpy(nib.load(path_moving_pred).get_fdata()).float()
+
+        path_fixed_pred = os.path.join(data_dir, pair["fixed_mask"])
+        path_moving_pred = os.path.join(data_dir, pair["moving_mask"])
         pred_fixed = torch.from_numpy(nib.load(path_fixed_pred).get_fdata()).float()
         pred_moving = torch.from_numpy(nib.load(path_moving_pred).get_fdata()).float()
 
@@ -85,7 +97,7 @@ def main(task_name,
         
         affine = nib.load(path_fixed).affine
 
-        disp_path = os.path.join(result_path, task_name, 'results_testset', 'disp_{}_{}'.format(pair['fixed'][-16:-12], pair['moving'][-16:-12]+'.nii.gz'))
+        disp_path = os.path.join(result_path, task_name, 'results_testset', 'disp_{}_{}'.format(pair['fixed'][-17:-15], pair['moving'][-17:-15]+'.nii.gz'))
         disp_nii = nib.Nifti1Image(displacements, affine)
         nib.save(disp_nii, disp_path)
 

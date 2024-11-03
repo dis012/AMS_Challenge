@@ -31,10 +31,18 @@ def get_data_train(topk,HWD,f_predict,f_gt):
     
     for i in topk:
         pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
+        preds_fixed.append(pred_fixed)
+        # add MR images to the list
+        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4)).replace('CT', 'MR')).get_fdata()).float().cuda().contiguous()
+        preds_fixed.append(pred_fixed)
+
+        # same for the segmentation
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4)).replace('CT', 'MR')).get_fdata()).float().cuda().contiguous()
+        segs_fixed.append(seg_fixed)
         seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
+
         #img_fixed =  torch.from_numpy(nib.load(l2r_base_folder+'AbdomenCTCT/imagesTr/AbdomenCTCT_00'+str(i).zfill(2)+'_0000.nii.gz').get_fdata()).float().cuda().contiguous()
-        preds_fixed.append(pred_fixed)
     return preds_fixed,segs_fixed
 
 def main(gpunum,configfile):
@@ -91,6 +99,10 @@ def main(gpunum,configfile):
             pred_moving = preds_fixed[ij[1]].float()
             seg_fixed = segs_fixed[ij[0]]
             seg_moving = segs_fixed[ij[1]]
+
+            # Normalize before passing to the network - CT slike majo negativne vrednosti zato torch.bincount vrne napako
+            pred_fixed = (pred_fixed - pred_fixed.min()) / (pred_fixed.max() - pred_fixed.min())
+            pred_moving = (pred_moving - pred_moving.min()) / (pred_moving.max() - pred_moving.min())
 
             H, W, D = pred_fixed.shape
             grid0 = F.affine_grid(torch.eye(3,4).unsqueeze(0).cuda(),(1,1,H,W,D),align_corners=False)
@@ -178,3 +190,16 @@ if __name__ == "__main__":
     gpu_id = int(sys.argv[1])
     configfile = str(sys.argv[2])
     main(gpu_id,configfile)
+    
+    '''
+    with open("/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/HyperParamConfig.json", 'r') as f:
+        config = json.load(f)
+    topk = config['topk']
+    reds_fixed,segs_fixed = get_data_train(topk,config['HWD'],config['f_predict'],config['f_gt'])
+    print(config['output'])
+    #print(len(reds_fixed))
+
+    for i in range(len(reds_fixed)-1):
+        img = reds_fixed[i].long().reshape(-1)
+        print((img < 0).any().item())
+    '''

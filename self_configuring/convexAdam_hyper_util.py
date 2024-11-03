@@ -25,6 +25,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from scipy.ndimage import distance_transform_edt as edt
+from scipy.ndimage import distance_transform_edt
 import cupy
 #from cupyx.scipy.ndimage import distance_transform_edt
 
@@ -44,13 +45,17 @@ def cupy_hd95(fixed, moving, num_labels, precision=1):
     hd95 = cupy.zeros(num_labels)
     for i in range(num_labels):
         if((fixed_[i].sum()>0)&(moving_[i].sum()>0)):
-            dist1 = distance_transform_edt(fixed_c[i], float64_distances=False)
+            #dist1 = distance_transform_edt(fixed_c[i], float64_distances=False)
+            dist1 = distance_transform_edt(fixed_c[i].get())
             surf1 = dist1 == 1
-            dist1 += distance_transform_edt(1-fixed_c[i], float64_distances=False)
+            #dist1 += distance_transform_edt(1-fixed_c[i], float64_distances=False)
+            dist1 += distance_transform_edt(1-fixed_c[i].get())
             
-            dist2 = distance_transform_edt(moving_c[i], float64_distances=False)
+            #dist2 = distance_transform_edt(moving_c[i], float64_distances=False)
+            dist2 = distance_transform_edt(moving_c[i].get())
             surf2 = dist2 == 1
-            dist2 += distance_transform_edt(1-moving_c[i], float64_distances=False)
+            #dist2 += distance_transform_edt(1-moving_c[i], float64_distances=False)
+            dist2 += distance_transform_edt(1-moving_c[i].get())
 
             hd95[i] = (np.maximum(np.percentile(dist1[surf2], 95), np.percentile(dist2[surf1], 95)))
         else:
