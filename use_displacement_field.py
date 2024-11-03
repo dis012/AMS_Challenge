@@ -8,13 +8,13 @@ def normalize_image(img):
     return (img - np.min(img)) / (np.max(img) - np.min(img))
 
 # Paths to the images and displacement field
-moving_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/imagesTr/img0006_tcia_MR.nii.gz"
-fixed_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/imagesTr/img0006_tcia_CT.nii.gz"
+moving_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/imagesTr/img0006_tcia_CT.nii.gz"
+fixed_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/imagesTr/img0006_tcia_MR.nii.gz"
 disp_field_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/Optimization_test_aligment/OptimizedAligment/results_testset/disp_06_06.nii.gz"
 
 # Load the images
-ct_image = sitk.ReadImage(fixed_image_path)
-mr_image = sitk.ReadImage(moving_image_path)
+ct_image = sitk.ReadImage(moving_image_path)
+mr_image = sitk.ReadImage(fixed_image_path)
 
 # Load the displacement field as a scalar image
 displacement_field_img = sitk.ReadImage(disp_field_path)
@@ -51,9 +51,9 @@ if displacement_field_array.ndim == 4:
     displacement_transform = sitk.DisplacementFieldTransform(displacement_field_vector)
     
     # Resample (warp) the MR image to align with the CT image
-    warped_mr_image = sitk.Resample(
-        mr_image,
-        ct_image,  # Use the CT image as a reference
+    warped_ct_image = sitk.Resample(
+        ct_image,
+        mr_image,  # Use the MR image as a reference
         displacement_transform,  # Displacement field transform
         sitk.sitkLinear,  # Interpolation method
         0.0,  # Default pixel value for areas outside the image
@@ -61,8 +61,8 @@ if displacement_field_array.ndim == 4:
     )
     
     # Save the warped MR image
-    sitk.WriteImage(warped_mr_image, "warped_mr_image.nii.gz")
-    print("Warped MR image saved as 'warped_mr_image.nii.gz'")
+    sitk.WriteImage(warped_ct_image, "warped_ct_image.nii.gz")
+    print("Warped MR image saved as 'warped_ct_image.nii.gz'")
 else:
     print("Displacement field is not 4D. Cannot proceed.")
 
@@ -70,11 +70,11 @@ else:
 
 # Convert images to numpy arrays
 mr_image_array = sitk.GetArrayFromImage(mr_image)
-warped_mr_image_array = sitk.GetArrayFromImage(warped_mr_image)
+warped_ct_image_array = sitk.GetArrayFromImage(warped_ct_image)
 ct_image_array = sitk.GetArrayFromImage(ct_image)
 
 mr_norm = normalize_image(mr_image_array)
-warped_mr_norm = normalize_image(warped_mr_image_array)
+warped_ct_norm = normalize_image(warped_ct_image_array)
 ct_norm = normalize_image(ct_image_array)
 
 # Define slice indices for each orientation
@@ -84,17 +84,17 @@ slice_index_coronal = mr_image_array.shape[1] // 2   # Coronal plane (height)
 
 # Axial slices
 mr_axial = mr_norm[slice_index_axial, :, :]
-warped_mr_axial = warped_mr_norm[slice_index_axial, :, :]
+warped_ct_axial = warped_ct_norm[slice_index_axial, :, :]
 ct_axial = ct_norm[slice_index_axial, :, :]
 
 # Sagittal slices (need to transpose for correct orientation)
-mr_sagittal = np.transpose(mr_norm[:, :, slice_index_sagittal], (1, 0))
-warped_mr_sagittal = np.transpose(warped_mr_norm[:, :, slice_index_sagittal], (1, 0))
 ct_sagittal = np.transpose(ct_norm[:, :, slice_index_sagittal], (1, 0))
+warped_ct_sagittal = np.transpose(warped_ct_norm[:, :, slice_index_sagittal], (1, 0))
+mr_sagittal = np.transpose(mr_norm[:, :, slice_index_sagittal], (1, 0))
 
 # Coronal slices (need to transpose for correct orientation)
 mr_coronal = np.transpose(mr_norm[:, slice_index_coronal, :], (1, 0))
-warped_mr_coronal = np.transpose(warped_mr_norm[:, slice_index_coronal, :], (1, 0))
+warped_ct_coronal = np.transpose(warped_ct_norm[:, slice_index_coronal, :], (1, 0))
 ct_coronal = np.transpose(ct_norm[:, slice_index_coronal, :], (1, 0))
 
 # Create a figure with 3 rows and 2 columns
@@ -111,21 +111,21 @@ axs[0, 0].set_title('Axial Plane: MR and CT Overlay')
 axs[0, 0].axis('off')
 
 # Warped MR and CT overlay
-axs[0, 1].imshow(ct_axial, cmap='gray')
-axs[0, 1].imshow(warped_mr_axial, cmap='hot', alpha=0.5)
+axs[0, 1].imshow(mr_axial, cmap='gray')
+axs[0, 1].imshow(warped_ct_axial, cmap='hot', alpha=0.5)
 axs[0, 1].set_title('Axial Plane: Warped MR and CT Overlay')
 axs[0, 1].axis('off')
 
 # Sagittal plane
 # Original MR and CT overlay
-axs[1, 0].imshow(ct_sagittal, cmap='gray', aspect='auto')
-axs[1, 0].imshow(mr_sagittal, cmap='hot', alpha=0.5, aspect='auto')
+axs[1, 0].imshow(mr_sagittal, cmap='gray', aspect='auto')
+axs[1, 0].imshow(ct_sagittal, cmap='hot', alpha=0.5, aspect='auto')
 axs[1, 0].set_title('Sagittal Plane: MR and CT Overlay')
 axs[1, 0].axis('off')
 
 # Warped MR and CT overlay
-axs[1, 1].imshow(ct_sagittal, cmap='gray', aspect='auto')
-axs[1, 1].imshow(warped_mr_sagittal, cmap='hot', alpha=0.5, aspect='auto')
+axs[1, 1].imshow(mr_sagittal, cmap='gray', aspect='auto')
+axs[1, 1].imshow(warped_ct_sagittal, cmap='hot', alpha=0.5, aspect='auto')
 axs[1, 1].set_title('Sagittal Plane: Warped MR and CT Overlay')
 axs[1, 1].axis('off')
 
@@ -137,8 +137,8 @@ axs[2, 0].set_title('Coronal Plane: MR and CT Overlay')
 axs[2, 0].axis('off')
 
 # Warped MR and CT overlay
-axs[2, 1].imshow(ct_coronal, cmap='grey', aspect='auto')
-axs[2, 1].imshow(warped_mr_coronal, cmap='hot', alpha=0.5, aspect='auto')
+axs[2, 1].imshow(mr_coronal, cmap='grey', aspect='auto')
+axs[2, 1].imshow(warped_ct_coronal, cmap='hot', alpha=0.5, aspect='auto')
 axs[2, 1].set_title('Coronal Plane: Warped MR and CT Overlay')
 axs[2, 1].axis('off')
 
