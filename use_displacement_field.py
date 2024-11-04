@@ -8,9 +8,9 @@ def normalize_image(img):
     return (img - np.min(img)) / (np.max(img) - np.min(img))
 
 # Paths to the images and displacement field
-moving_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/imagesTr/img0006_tcia_CT.nii.gz"
-fixed_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/imagesTr/img0006_tcia_MR.nii.gz"
-disp_field_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/Optimization_test_aligment/OptimizedAligment/results_testset/disp_06_06.nii.gz"
+moving_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/AbdomenMRCT/imagesTr/img0016_tcia_CT.nii.gz"
+fixed_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/AbdomenMRCT/imagesTr/img0016_tcia_MR.nii.gz"
+disp_field_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/Optimization_test_aligment/OptimizedAligment/results_testset/disp_16_16.nii.gz"
 
 # Load the images
 ct_image = sitk.ReadImage(moving_image_path)
@@ -30,6 +30,46 @@ print("Number of components per pixel:", displacement_field_img.GetNumberOfCompo
 # Convert displacement field to numpy array
 displacement_field_array = sitk.GetArrayFromImage(displacement_field_img)
 print("Displacement field array shape:", displacement_field_array.shape)
+
+'''
+# Check if the displacement field needs to be transposed
+if displacement_field_array.shape[-1] == 3:
+    # Components are along the last axis, no transpose needed
+    pass
+elif displacement_field_array.shape[0] == 3:
+    # Components are along the first axis, transpose to (Z, Y, X, C)
+    displacement_field_array = np.transpose(displacement_field_array, (1, 2, 3, 0))
+else:
+    print("Unexpected displacement field shape. Cannot proceed.")
+    exit(1)
+
+# Create a vector image from the numpy array
+displacement_field_vector = sitk.GetImageFromArray(displacement_field_array, isVector=True)
+
+# Copy spatial information from the fixed image
+displacement_field_vector.CopyInformation(ct_image)
+
+# Cast to the appropriate vector pixel type
+displacement_field_vector = sitk.Cast(displacement_field_vector, sitk.sitkVectorFloat64)
+
+# Create the displacement field transform
+displacement_transform = sitk.DisplacementFieldTransform(displacement_field_vector)
+
+# Resample (warp) the moving image to align with the fixed image
+warped_ct_image = sitk.Resample(
+    ct_image,
+    mr_image,  # Use the fixed image as a reference
+    displacement_transform,  # Displacement field transform
+    sitk.sitkLinear,  # Interpolation method
+    0.0,  # Default pixel value for areas outside the image
+    mr_image.GetPixelID()  # Output image type matches the moving image
+)
+
+# Save the warped MR image
+sitk.WriteImage(warped_ct_image, "warped_ct_image.nii.gz")
+print("Warped MR image saved as 'warped_ct_image.nii.gz'")
+'''
+
 
 # Determine if the displacement field is 4D
 if displacement_field_array.ndim == 4:
@@ -55,7 +95,7 @@ if displacement_field_array.ndim == 4:
         ct_image,
         mr_image,  # Use the MR image as a reference
         displacement_transform,  # Displacement field transform
-        sitk.sitkLinear,  # Interpolation method
+        sitk.sitkBSpline,  # Interpolation method
         0.0,  # Default pixel value for areas outside the image
         mr_image.GetPixelID()  # Ensure output image type matches the MR image
     )
@@ -113,7 +153,7 @@ axs[0, 0].axis('off')
 # Warped MR and CT overlay
 axs[0, 1].imshow(mr_axial, cmap='gray')
 axs[0, 1].imshow(warped_ct_axial, cmap='hot', alpha=0.5)
-axs[0, 1].set_title('Axial Plane: Warped MR and CT Overlay')
+axs[0, 1].set_title('Axial Plane: Warped CT and MR Overlay')
 axs[0, 1].axis('off')
 
 # Sagittal plane
@@ -126,7 +166,7 @@ axs[1, 0].axis('off')
 # Warped MR and CT overlay
 axs[1, 1].imshow(mr_sagittal, cmap='gray', aspect='auto')
 axs[1, 1].imshow(warped_ct_sagittal, cmap='hot', alpha=0.5, aspect='auto')
-axs[1, 1].set_title('Sagittal Plane: Warped MR and CT Overlay')
+axs[1, 1].set_title('Sagittal Plane: Warped CT and MR Overlay')
 axs[1, 1].axis('off')
 
 # Coronal plane
@@ -139,7 +179,7 @@ axs[2, 0].axis('off')
 # Warped MR and CT overlay
 axs[2, 1].imshow(mr_coronal, cmap='grey', aspect='auto')
 axs[2, 1].imshow(warped_ct_coronal, cmap='hot', alpha=0.5, aspect='auto')
-axs[2, 1].set_title('Coronal Plane: Warped MR and CT Overlay')
+axs[2, 1].set_title('Coronal Plane: Warped CT and MR Overlay')
 axs[2, 1].axis('off')
 
 # Save and display the figure
