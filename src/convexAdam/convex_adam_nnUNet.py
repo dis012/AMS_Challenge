@@ -20,29 +20,36 @@ warnings.filterwarnings("ignore")
 # process nnUNet features
 def extract_features(pred_fixed,
                     pred_moving):
+    
+    torch.cuda.empty_cache()
 
     # Odstani robove, da zmanjsas velikost
     # Zagotovi, da je prva slika CT slika!
     pred_moving, pred_fixed = get_common_bounding_box(pred_moving, pred_fixed)
     #print(pred_moving.shape, pred_fixed.shape)
 
-    torch.cuda.empty_cache()
+    # Decimiraj slike
+    pred_fixed = downsample_image(pred_fixed, scale_factor=0.5)
+    #print(pred_fixed.shape)
+    pred_moving = downsample_image(pred_moving, scale_factor=0.5)
+    #print(pred_moving.shape)
+    
+    # Linearna preslikava sivinskih vrednosti v interval [0,255]
+    pred_moving, pred_fixed = adjust_values(pred_moving, pred_fixed)
+    print(pred_moving.shape, pred_fixed.shape)
+
+    # Nesmes normalizirat ker torch.bicount sprejme diskretne vrednosti - POPRAVI DRUGJE
 
     eps=1e-32
     H,W,D = pred_fixed.shape[-3:]
     
-    # Linearna preslikava sivinskih vrednosti v interval [0,255]
-    pred_moving, pred_fixed = adjust_values(pred_moving, pred_fixed)
+    #combined_bins = torch.bincount(pred_fixed.long().reshape(-1))+torch.bincount(pred_moving.long().reshape(-1))
+    # Find the maximum value across both images
+    max_val = int(max(pred_fixed.max().item(), pred_moving.max().item()))
 
-    # Decimiraj slike
-    pred_fixed = downsample_image(pred_fixed, scale_factor=0.5)
-    print(pred_fixed.shape)
-    pred_moving = downsample_image(pred_moving, scale_factor=0.5)
-    print(pred_moving.shape)
-
-    # Nesmes normalizirat ker torch.bicount sprejme diskretne vrednosti - POPRAVI DRUGJE
-    
-    combined_bins = torch.bincount(pred_fixed.long().reshape(-1))+torch.bincount(pred_moving.long().reshape(-1))
+    # Compute bincounts with the same minlength
+    combined_bins = torch.bincount(pred_fixed.long().reshape(-1), minlength=max_val + 1) + \
+                    torch.bincount(pred_moving.long().reshape(-1), minlength=max_val + 1)
     #print(combined_bins)
     
     pos = torch.nonzero(combined_bins).reshape(-1)

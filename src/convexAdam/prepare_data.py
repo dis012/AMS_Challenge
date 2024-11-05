@@ -59,7 +59,7 @@ def adjust_values(image_ct, image_mr):
 
     return adjusted_image_ct, adjusted_image_mr
 
-def downsample_image(image, scale_factor=None, target_size=None, mode='trilinear'):
+def downsample_image(image, scale_factor=None, target_size=None, mode='nearest'):
     """
     Downsample a 3D image tensor.
     
@@ -70,13 +70,15 @@ def downsample_image(image, scale_factor=None, target_size=None, mode='trilinear
     :return: Downsampled 3D tensor
     """
     # Add batch and channel dimensions to use with F.interpolate
-    image = image.unsqueeze(0).unsqueeze(0)  # Shape becomes (1, 1, H, W, D)
+    image = image.float().unsqueeze(0).unsqueeze(0)  # Shape becomes (1, 1, H, W, D)
     
     # Downsample using scale_factor or target_size
     if scale_factor is not None:
-        downsampled_image = F.interpolate(image, scale_factor=scale_factor, mode=mode, align_corners=False)
+        #downsampled_image = F.interpolate(image, scale_factor=scale_factor, mode=mode, align_corners=False)
+        downsampled_image = F.interpolate(image, scale_factor=scale_factor, mode=mode)
     elif target_size is not None:
-        downsampled_image = F.interpolate(image, size=target_size, mode=mode, align_corners=False)
+        #downsampled_image = F.interpolate(image, size=target_size, mode=mode, align_corners=False)
+        downsampled_image = F.interpolate(image, size=target_size, mode=mode)
     else:
         raise ValueError("Either scale_factor or target_size must be provided.")
     
