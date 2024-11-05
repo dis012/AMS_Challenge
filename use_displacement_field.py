@@ -8,9 +8,9 @@ def normalize_image(img):
     return (img - np.min(img)) / (np.max(img) - np.min(img))
 
 # Paths to the images and displacement field
-moving_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/AbdomenMRCT/imagesTr/img0016_tcia_CT.nii.gz"
-fixed_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/AbdomenMRCT/imagesTr/img0016_tcia_MR.nii.gz"
-disp_field_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/Optimization_test_aligment/OptimizedAligment/results_testset/disp_16_16.nii.gz"
+moving_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/Abdomen/imagesTr/img0016_tcia_CT.nii.gz"
+fixed_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/Abdomen/imagesTr/img0016_tcia_MR.nii.gz"
+disp_field_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/Output/disp.nii.gz"
 
 # Load the images
 ct_image = sitk.ReadImage(moving_image_path)
@@ -90,18 +90,18 @@ if displacement_field_array.ndim == 4:
     # Convert the displacement field to a transform
     displacement_transform = sitk.DisplacementFieldTransform(displacement_field_vector)
     
-    # Resample (warp) the MR image to align with the CT image
+    # Resample (warp) the CT image to align with the MR image
     warped_ct_image = sitk.Resample(
         ct_image,
         mr_image,  # Use the MR image as a reference
         displacement_transform,  # Displacement field transform
         sitk.sitkBSpline,  # Interpolation method
         0.0,  # Default pixel value for areas outside the image
-        mr_image.GetPixelID()  # Ensure output image type matches the MR image
+        ct_image.GetPixelID()  # Ensure output image type matches the MR image
     )
     
     # Save the warped MR image
-    sitk.WriteImage(warped_ct_image, "warped_ct_image.nii.gz")
+    sitk.WriteImage(warped_ct_image, "warped_ct_image_tested_on_convex_adam_nnUNet.nii.gz")
     print("Warped MR image saved as 'warped_ct_image.nii.gz'")
 else:
     print("Displacement field is not 4D. Cannot proceed.")
@@ -128,9 +128,9 @@ warped_ct_axial = warped_ct_norm[slice_index_axial, :, :]
 ct_axial = ct_norm[slice_index_axial, :, :]
 
 # Sagittal slices (need to transpose for correct orientation)
-ct_sagittal = np.transpose(ct_norm[:, :, slice_index_sagittal], (1, 0))
-warped_ct_sagittal = np.transpose(warped_ct_norm[:, :, slice_index_sagittal], (1, 0))
-mr_sagittal = np.transpose(mr_norm[:, :, slice_index_sagittal], (1, 0))
+ct_sagittal = ct_norm[:, :, slice_index_sagittal]
+warped_ct_sagittal = warped_ct_norm[:, :, slice_index_sagittal]
+mr_sagittal = mr_norm[:, :, slice_index_sagittal]
 
 # Coronal slices (need to transpose for correct orientation)
 mr_coronal = np.transpose(mr_norm[:, slice_index_coronal, :], (1, 0))
@@ -183,7 +183,7 @@ axs[2, 1].set_title('Coronal Plane: Warped CT and MR Overlay')
 axs[2, 1].axis('off')
 
 # Save and display the figure
-plt.savefig("overlapping_slices.png")
+plt.savefig("overlapping_slices_tested_on_convex_adam_nnUNet.png")
 plt.show()
 
 
