@@ -9,8 +9,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from convexAdam.convex_adam_utils import (correlate, coupled_convex,
+from convex_adam_utils import (correlate, coupled_convex,
                                           inverse_consistency)
+
+from prepare_data import get_common_bounding_box, adjust_values, downsample_image
 
 warnings.filterwarnings("ignore")
 
@@ -19,10 +21,29 @@ warnings.filterwarnings("ignore")
 def extract_features(pred_fixed,
                     pred_moving):
 
+    # Odstani robove, da zmanjsas velikost
+    # Zagotovi, da je prva slika CT slika!
+    pred_moving, pred_fixed = get_common_bounding_box(pred_moving, pred_fixed)
+    #print(pred_moving.shape, pred_fixed.shape)
+
+    torch.cuda.empty_cache()
+
     eps=1e-32
     H,W,D = pred_fixed.shape[-3:]
     
+    # Linearna preslikava sivinskih vrednosti v interval [0,255]
+    pred_moving, pred_fixed = adjust_values(pred_moving, pred_fixed)
+
+    # Decimiraj slike
+    pred_fixed = downsample_image(pred_fixed, scale_factor=0.5)
+    print(pred_fixed.shape)
+    pred_moving = downsample_image(pred_moving, scale_factor=0.5)
+    print(pred_moving.shape)
+
+    # Nesmes normalizirat ker torch.bicount sprejme diskretne vrednosti - POPRAVI DRUGJE
+    
     combined_bins = torch.bincount(pred_fixed.long().reshape(-1))+torch.bincount(pred_moving.long().reshape(-1))
+    #print(combined_bins)
     
     pos = torch.nonzero(combined_bins).reshape(-1)
      
