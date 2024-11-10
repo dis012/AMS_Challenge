@@ -75,7 +75,6 @@ def correlate(mind_fix,mind_mov,disp_hw,grid_sp,shape, ch=12):
     with torch.no_grad():
         mind_unfold = F.unfold(F.pad(mind_mov,(disp_hw,disp_hw,disp_hw,disp_hw,disp_hw,disp_hw)).squeeze(0),disp_hw*2+1)
         mind_unfold = mind_unfold.view(ch,-1,(disp_hw*2+1)**2,W//grid_sp,D//grid_sp)
-        
 
     ssd = torch.zeros((disp_hw*2+1)**3,H//grid_sp,W//grid_sp,D//grid_sp,dtype=mind_fix.dtype, device=mind_fix.device)#.cuda().half()
     ssd_argmin = torch.zeros(H//grid_sp,W//grid_sp,D//grid_sp).long()
@@ -91,7 +90,6 @@ def correlate(mind_fix,mind_mov,disp_hw,grid_sp,shape, ch=12):
     #print(t1-t0,'sec (ssd)')
     #gpu_usage()
     return ssd,ssd_argmin
-
 
 
 #solve two coupled convex optimisation problems for efficient global regularisation

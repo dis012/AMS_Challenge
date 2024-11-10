@@ -10,6 +10,8 @@ def normalize_image(img):
 # Paths to the images and displacement field
 moving_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/Abdomen/imagesTr/img0016_tcia_CT.nii.gz"
 fixed_image_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Data/Abdomen/imagesTr/img0016_tcia_MR.nii.gz"
+#disp_field_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/Output/disp.nii.gz"
+#disp_field_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/Optimization_test_aligment/OptimizedAligment/results_testset/disp_16_16.nii.gz"
 disp_field_path = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/Output/disp.nii.gz"
 
 # Load the images
@@ -101,8 +103,8 @@ if displacement_field_array.ndim == 4:
     )
     
     # Save the warped MR image
-    sitk.WriteImage(warped_ct_image, "warped_ct_image_tested_on_convex_adam_nnUNet.nii.gz")
-    print("Warped MR image saved as 'warped_ct_image.nii.gz'")
+    sitk.WriteImage(warped_ct_image, "warped_ct_image_tested_on_convex_adam_using_just_segmentations.nii.gz")
+    print("warped_ct_image_tested_on_convex_adam_using_just_segmentations.nii.gz saved.")
 else:
     print("Displacement field is not 4D. Cannot proceed.")
 
@@ -183,7 +185,8 @@ axs[2, 1].set_title('Coronal Plane: Warped CT and MR Overlay')
 axs[2, 1].axis('off')
 
 # Save and display the figure
-plt.savefig("overlapping_slices_tested_on_convex_adam_nnUNet.png")
+#plt.savefig("overlapping_slices_tested_on_convex_adam_nnUNet.png")
+plt.savefig("overlapping_slices_tested_on_convex_adam_using_just_segmentations.png")
 plt.show()
 
 

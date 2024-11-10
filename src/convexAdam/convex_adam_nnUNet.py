@@ -25,31 +25,34 @@ def extract_features(pred_fixed,
 
     # Odstani robove, da zmanjsas velikost
     # Zagotovi, da je prva slika CT slika!
-    pred_moving, pred_fixed = get_common_bounding_box(pred_moving, pred_fixed)
+    #pred_moving, pred_fixed = get_common_bounding_box(pred_moving, pred_fixed)
     #print(pred_moving.shape, pred_fixed.shape)
 
+    # Make sure dimensions (target size) is divisible by grid spacing
+    #target_size = (pred_moving.shape[0]//4*3, pred_moving.shape[1]//4*3, pred_moving.shape[2]//4*3)
     # Decimiraj slike
-    pred_fixed = downsample_image(pred_fixed, scale_factor=0.5)
+    #pred_fixed = downsample_image(pred_fixed,target_size=target_size)
     #print(pred_fixed.shape)
-    pred_moving = downsample_image(pred_moving, scale_factor=0.5)
+    #pred_moving = downsample_image(pred_moving,target_size=target_size)
     #print(pred_moving.shape)
     
     # Linearna preslikava sivinskih vrednosti v interval [0,255]
-    pred_moving, pred_fixed = adjust_values(pred_moving, pred_fixed)
-    print(pred_moving.shape, pred_fixed.shape)
+    #pred_moving, pred_fixed = adjust_values(pred_moving, pred_fixed)
+    #print(pred_moving.min(), pred_fixed.min())
 
     # Nesmes normalizirat ker torch.bicount sprejme diskretne vrednosti - POPRAVI DRUGJE
 
     eps=1e-32
     H,W,D = pred_fixed.shape[-3:]
+    #print("H, W, D:", H, W, D)
     
-    #combined_bins = torch.bincount(pred_fixed.long().reshape(-1))+torch.bincount(pred_moving.long().reshape(-1))
+    combined_bins = torch.bincount(pred_fixed.long().reshape(-1))+torch.bincount(pred_moving.long().reshape(-1))
     # Find the maximum value across both images
-    max_val = int(max(pred_fixed.max().item(), pred_moving.max().item()))
+    #max_val = int(max(pred_fixed.max().item(), pred_moving.max().item()))
 
     # Compute bincounts with the same minlength
-    combined_bins = torch.bincount(pred_fixed.long().reshape(-1), minlength=max_val + 1) + \
-                    torch.bincount(pred_moving.long().reshape(-1), minlength=max_val + 1)
+    #combined_bins = torch.bincount(pred_fixed.long().reshape(-1), minlength=max_val + 1) + \
+    #                torch.bincount(pred_moving.long().reshape(-1), minlength=max_val + 1)
     #print(combined_bins)
     
     pos = torch.nonzero(combined_bins).reshape(-1)
@@ -80,6 +83,8 @@ def convex_adam(path_pred_fixed,
     pred_fixed = torch.from_numpy(nib.load(path_pred_fixed).get_fdata()).float()
     pred_moving = torch.from_numpy(nib.load(path_pred_moving).get_fdata()).float()
     
+    # In extract features, we downsample the images by a factor of 0.5 so we need to use
+    # new dimensions for the grid spacing
     H,W,D = pred_fixed.shape[-3:]
 
     torch.cuda.synchronize()
@@ -93,9 +98,15 @@ def convex_adam(path_pred_fixed,
         
         features_fix_smooth = F.avg_pool3d(features_fix,grid_sp,stride=grid_sp)
         features_mov_smooth = F.avg_pool3d(features_mov,grid_sp,stride=grid_sp)
+
+        # Print shapes to debug
+        #print("features_fix_smooth shape:", features_fix_smooth.shape)
+        #print("features_mov_smooth shape:", features_mov_smooth.shape)
         
         n_ch = features_fix_smooth.shape[1]
 
+    #H,W,D = features_fix_smooth.shape[-3:]
+    #print("H, W, D:", H, W, D)
     # compute correlation volume with SSD
     ssd,ssd_argmin = correlate(features_fix_smooth,features_mov_smooth,disp_hw,grid_sp,(H,W,D), n_ch)
 
