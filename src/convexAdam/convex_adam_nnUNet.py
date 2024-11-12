@@ -194,7 +194,7 @@ def convex_adam(path_pred_fixed,
 
     affine = nib.load(path_pred_fixed).affine
     disp_nii = nib.Nifti1Image(displacements, affine)
-    nib.save(disp_nii, os.path.join(result_path,'disp.nii.gz'))
+    nib.save(disp_nii, os.path.join(result_path,'disp16.nii.gz'))
     return
 
 

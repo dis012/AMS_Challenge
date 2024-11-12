@@ -38,6 +38,7 @@ def sort_rank(value):
     rank1[value.sort().indices] = torch.linspace(1,.1,len(value)).to(value.device)
     return rank1
 def cupy_hd95(fixed, moving, num_labels, precision=1):
+    #print(f'Shape of fixed {fixed.shape}, Max label in fixed {fixed.max()}, Num labels {num_labels}')
     fixed_ = F.interpolate(F.one_hot(fixed, num_labels+1).permute(3, 0, 1, 2).unsqueeze(0).to(torch.uint8)[:, 1:], scale_factor=precision)[0]
     moving_ = F.interpolate(F.one_hot(moving, num_labels+1).permute(3, 0, 1, 2).unsqueeze(0).to(torch.uint8)[:, 1:], scale_factor=precision)[0]
     fixed_c = cupy.asarray(fixed_)
