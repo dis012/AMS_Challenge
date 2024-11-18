@@ -21,8 +21,8 @@ from convexAdam_hyper_util import MINDSSC, correlate, coupled_convex, inverse_co
 def get_data_train(topk,HWD,f_predict,f_gt):
     l2r_base_folder = './'
     print('reading test data')
-    f_predict = f_predict.replace('sTr/','sTs/')
-    f_gt = f_gt.replace('sTr/','sTs/')
+    #f_predict = f_predict.replace('sTr/','sTs/')
+    #f_gt = f_gt.replace('sTr/','sTs/')
     
     H,W,D = HWD[0],HWD[1],HWD[2]
     #robustify
@@ -39,11 +39,14 @@ def get_data_train(topk,HWD,f_predict,f_gt):
         #seg_fixed = torch.from_numpy(nib.load(file_seg).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(None)#seg_fixed)
         preds_fixed.append(pred_fixed)
-        
-        
-                
 
+        # Se MR slike za ta primer
+        file_pred = f_predict.replace('CT','MR').replace('xxxx',str(i).zfill(4))
+        pred_fixed = torch.from_numpy(nib.load(file_pred).get_fdata()).float().cuda().contiguous()
+        preds_fixed.append(pred_fixed)
+        
     return preds_fixed,segs_fixed
+
 def main(gpunum,configfile,convex_s,adam_s1,adam_s2):
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -162,7 +165,16 @@ def main(gpunum,configfile,convex_s,adam_s1,adam_s2):
     for i in trange(len(topk_pair)):
         file = config['f_gt'].split('/')[-1]
         stem = file.split('_')[0]
-        file_field = stem+'/fieldsTs/'+file.replace(stem,'disp').replace('0000',str(int(topk[topk_pair[i][1]])).zfill(4)).replace('xxxx',str(int(topk[topk_pair[i][0]])).zfill(4))
+        #file_field = stem+'/fieldsTs/'+file.replace(stem,'disp').replace('0000',str(int(topk[topk_pair[i][1]])).zfill(4)).replace('xxxx',str(int(topk[topk_pair[i][0]])).zfill(4))
+
+        # Drugacen output folder
+        file_field = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/InferConvexAdamOutput/"
+        #fixed_idx = str(int(topk[topk_pair[i][0]])).zfill(4)
+        #moving_idx = str(int(topk[topk_pair[i][1]])).zfill(4)
+        img_idx = str(int(topk[i])).zfill(4)
+        file_name = f"disp_{img_idx}_to_{img_idx}.nii.gz"
+        file_field = os.path.join(file_field, file_name)
+
         print('writing output-nii to ',file_field)
         t0 = time.time()
 

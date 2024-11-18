@@ -30,15 +30,16 @@ def get_data_train(topk,HWD,f_predict,f_gt):
     segs_fixed = []
     
     for i in topk:
+        # Add CT images of expiration
         pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
-        # add MR images to the list
-        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4)).replace('CT', 'MR')).get_fdata()).float().cuda().contiguous()
-        preds_fixed.append(pred_fixed)
 
-        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4)).replace('y', '0')).get_fdata()).float().cuda().contiguous()
-        segs_fixed.append(seg_fixed)
-        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4)).replace('y', '1')).get_fdata()).float().cuda().contiguous()
+        # add MR images to the list
+        #pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4)).replace('CT', 'MR')).get_fdata()).float().cuda().contiguous()
+        #preds_fixed.append(pred_fixed)
+
+        # Add segmentation of expiration
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
 
         #img_fixed =  torch.from_numpy(nib.load(l2r_base_folder+'AbdomenCTCT/imagesTr/AbdomenCTCT_00'+str(i).zfill(2)+'_0000.nii.gz').get_fdata()).float().cuda().contiguous()
