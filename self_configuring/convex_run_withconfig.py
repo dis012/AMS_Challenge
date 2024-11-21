@@ -16,7 +16,12 @@ from cupyx.scipy.ndimage import distance_transform_edt
 from tqdm.auto import trange
 
 from convexAdam_hyper_util import MINDSSC, correlate, coupled_convex, inverse_consistency, dice_coeff,extract_features, sort_rank, jacobian_determinant_3d, kovesi_spline, GaussianSmoothing, gpu_usage, extract_features_nnunet,cupy_hd95
-            
+
+from helper_functions import estimate_memory_usage
+
+# Define a memory threshold (e.g., 9 GB for a 12 GB GPU)
+MEMORY_THRESHOLD = 9 * 1024 ** 3  # 9 GB in bytes
+
 def get_data_train(topk,HWD,f_predict,f_gt):
     l2r_base_folder = './'
 #~/storage/staff/christophgrossbroeh/data/Learn2Reg/Learn2Reg_Dataset_release_v1.1
@@ -31,7 +36,9 @@ def get_data_train(topk,HWD,f_predict,f_gt):
     
     for i in topk:
         # Add CT images of expiration
-        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
+        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxx',str(i).zfill(3))).get_fdata()).float().cuda().contiguous()
+        preds_fixed.append(pred_fixed)
+        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxx',str(i).zfill(3)).replace('exp', 'insp')).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
 
         # add MR images to the list
@@ -39,7 +46,9 @@ def get_data_train(topk,HWD,f_predict,f_gt):
         #preds_fixed.append(pred_fixed)
 
         # Add segmentation of expiration
-        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxx',str(i).zfill(3))).get_fdata()).float().cuda().contiguous()
+        segs_fixed.append(seg_fixed)
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxx',str(i).zfill(3)).replace('exp', 'insp')).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
 
         #img_fixed =  torch.from_numpy(nib.load(l2r_base_folder+'AbdomenCTCT/imagesTr/AbdomenCTCT_00'+str(i).zfill(2)+'_0000.nii.gz').get_fdata()).float().cuda().contiguous()
@@ -87,6 +96,15 @@ def main(gpunum,configfile):
         nn_mult = int(settings[s,0])#1
         grid_sp = int(settings[s,1])#6
         disp_hw = int(settings[s,2])#4
+
+        # Estimate total memory usage
+        estimated_memory = estimate_memory_usage(nn_mult, grid_sp, disp_hw, config['HWD'][0], config['HWD'][1], config['HWD'][2])
+        #print(f"Estimated memory usage for configuration {s}: {estimated_memory / 1024 ** 3:.2f} GB")
+
+        # Check if the estimated memory usage exceeds the threshold and skip the configuration if it does
+        if estimated_memory > MEMORY_THRESHOLD:
+            print(f"Skipping configuration {s} due to memory constraints.")
+            continue
 
         print('starting full run ',s,' out of 100')
         print('setting nn_mult',nn_mult,'grid_sp',grid_sp,'disp_hw',disp_hw)
@@ -144,7 +162,12 @@ def main(gpunum,configfile):
                 #lms_fix1 = (lms_fixed.flip(1)/scale1-1).cuda().view(1,-1,1,1,3)
                 #disp_sampled = F.grid_sample(disp_hr.float().cuda(),lms_fix1).squeeze().t().cpu().data
                 jac_det = jacobian_determinant_3d(disp_hr.float(),False)
-                torch.cuda.empty_cache()
+                try:
+                    del ssd, ssd_argmin
+                    torch.cuda.empty_cache()
+                except Exception as e:
+                    print(f"Memory cleanup failed: {e}")
+
                 
             seg_warped = F.grid_sample(seg_moving.view(1,1,H,W,D),grid0+disp_hr.permute(0,2,3,4,1).flip(-1).div(scale1),mode='nearest').squeeze()
             DICE1 = dice_coeff(seg_fixed,seg_warped,num_labels+1)

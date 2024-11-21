@@ -17,6 +17,11 @@ from tqdm.auto import trange,tqdm
 
 from convexAdam_hyper_util import MINDSSC, correlate, coupled_convex, inverse_consistency, dice_coeff,extract_features, sort_rank, jacobian_determinant_3d, kovesi_spline, GaussianSmoothing, gpu_usage, extract_features_nnunet,cupy_hd95
 
+from helper_functions import estimate_memory_usage
+
+# Define a memory threshold (e.g., 9 GB for a 12 GB GPU)
+MEMORY_THRESHOLD = 9 * 1024 ** 3  # 9 GB in bytes
+
             
 def get_data_train(topk,HWD,f_predict,f_gt):
     l2r_base_folder = './'
@@ -36,16 +41,15 @@ def get_data_train(topk,HWD,f_predict,f_gt):
         #segs_fixed.append(seg_fixed)
         #img_fixed =  torch.from_numpy(nib.load(l2r_base_folder+'AbdomenCTCT/imagesTr/AbdomenCTCT_00'+str(i).zfill(2)+'_0000.nii.gz').get_fdata()).float().cuda().contiguous()
         #preds_fixed.append(pred_fixed)
-        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
+        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxx',str(i).zfill(3))).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
-        # add MR images to the list
-        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4)).replace('CT', 'MR')).get_fdata()).float().cuda().contiguous()
+        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxx',str(i).zfill(3)).replace('exp', 'insp')).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
 
         # same for the segmentation
-        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4)).replace('CT', 'MR')).get_fdata()).float().cuda().contiguous()
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxx',str(i).zfill(3))).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
-        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxx',str(i).zfill(3)).replace('exp', 'insp')).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
     return preds_fixed,segs_fixed
 
@@ -96,11 +100,6 @@ def main(gpunum,configfile,convex_s):
         pred_moving = preds_fixed[ij[1]].float()
         seg_fixed = segs_fixed[ij[0]]
         seg_moving = segs_fixed[ij[1]]
-
-        # Normalize before passing to the network - CT slike majo negativne vrednosti zato torch.bincount vrne napako
-        pred_fixed = (pred_fixed - pred_fixed.min()) / (pred_fixed.max() - pred_fixed.min())
-        pred_moving = (pred_moving - pred_moving.min()) / (pred_moving.max() - pred_moving.min())
-
 
         H, W, D = pred_fixed.shape[-3:]
         grid0 = F.affine_grid(torch.eye(3,4).unsqueeze(0).cuda(),(1,1,H,W,D),align_corners=False)
@@ -191,11 +190,6 @@ def main(gpunum,configfile,convex_s):
             pred_moving = preds_fixed[ij[1]].float()
             seg_fixed = segs_fixed[ij[0]]
             seg_moving = segs_fixed[ij[1]]
-
-            # Normalize before passing to the network - CT slike majo negativne vrednosti zato torch.bincount vrne napako
-            pred_fixed = (pred_fixed - pred_fixed.min()) / (pred_fixed.max() - pred_fixed.min())
-            pred_moving = (pred_moving - pred_moving.min()) / (pred_moving.max() - pred_moving.min())
-
 
             H, W, D = pred_fixed.shape[-3:]
             grid0_hr = F.affine_grid(torch.eye(3,4).unsqueeze(0).cuda(),(1,1,H,W,D),align_corners=False)
