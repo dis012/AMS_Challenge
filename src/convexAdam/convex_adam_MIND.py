@@ -13,7 +13,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from scipy.ndimage import distance_transform_edt as edt
 
-from convexAdam.convex_adam_utils import (MINDSSC, correlate, coupled_convex,
+#from convexAdam.convex_adam_utils import (MINDSSC, correlate, coupled_convex,
+#                                          inverse_consistency)
+from convex_adam_utils import (MINDSSC, correlate, coupled_convex,
                                           inverse_consistency)
 
 warnings.filterwarnings("ignore")

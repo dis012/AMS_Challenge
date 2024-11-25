@@ -16,6 +16,10 @@ from cupyx.scipy.ndimage import distance_transform_edt
 from tqdm.auto import trange,tqdm
 
 from convexAdam_hyper_util import MINDSSC, correlate, coupled_convex, inverse_consistency, dice_coeff,extract_features, sort_rank, jacobian_determinant_3d, kovesi_spline, GaussianSmoothing, gpu_usage, extract_features_nnunet,cupy_hd95
+
+from helper_functions import estimate_memory_usage_MIND
+
+MEMORY_THRESHOLD = 9 * 1024 ** 3  # 9 GB in bytes
             
 def get_data_train(topk,HWD,f_img,f_key,f_mask):
     l2r_base_folder = './'
@@ -38,23 +42,23 @@ def get_data_train(topk,HWD,f_img,f_key,f_mask):
         file_key = f_key.replace('xxxx',str(i).zfill(4))
         file_mask = f_mask.replace('xxxx',str(i).zfill(4))
         
-        img_fixed = torch.from_numpy(nib.load(file_img).get_fdata()).float().cuda().contiguous()
-        key_fixed = torch.from_numpy(np.loadtxt(file_key,delimiter=',')).float()
-        mask_fixed = torch.from_numpy(nib.load(file_mask).get_fdata()).float().cuda().contiguous()
-        imgs_fixed.append(img_fixed)
-        keypts_fixed.append(key_fixed)
-        masks_fixed.append(mask_fixed)
-
-        file_img = file_img.replace('0000',str(1).zfill(4))
-        file_key = file_key.replace('0000',str(1).zfill(4))
-        file_mask = file_mask.replace('0000',str(1).zfill(4))
-        
         img_moving = torch.from_numpy(nib.load(file_img).get_fdata()).float().cuda().contiguous()
         key_moving = torch.from_numpy(np.loadtxt(file_key,delimiter=',')).float()
         mask_moving = torch.from_numpy(nib.load(file_mask).get_fdata()).float().cuda().contiguous()
         imgs_moving.append(img_moving)
         keypts_moving.append(key_moving)
         masks_moving.append(mask_moving)
+
+        file_img = file_img.replace('0000',str(1).zfill(4))
+        file_key = file_key.replace('0000',str(1).zfill(4))
+        file_mask = file_mask.replace('0000',str(1).zfill(4))
+
+        img_fixed = torch.from_numpy(nib.load(file_img).get_fdata()).float().cuda().contiguous()
+        key_fixed = torch.from_numpy(np.loadtxt(file_key,delimiter=',')).float()
+        mask_fixed = torch.from_numpy(nib.load(file_mask).get_fdata()).float().cuda().contiguous()
+        imgs_fixed.append(img_fixed)
+        keypts_fixed.append(key_fixed)
+        masks_fixed.append(mask_fixed)
 
     return imgs_fixed,keypts_fixed,masks_fixed,imgs_moving,keypts_moving,masks_moving
 
@@ -87,6 +91,8 @@ def main(gpunum,configfile):
     print('using 15 registration pairs')
     imgs_fixed,keypts_fixed,masks_fixed,imgs_moving,keypts_moving,masks_moving = get_data_train(topk,config['HWD'],config['f_img'],config['f_key'],config['f_mask'])
     robust30 = []
+    print(keypts_fixed[0].shape)
+    print(keypts_moving[0].shape)
     for i in range(len(topk)):
         tre0 = (keypts_fixed[i]-keypts_moving[i]).square().sum(-1).sqrt()
         robust30.append(tre0.topk(int(len(tre0)*.3),largest=True).indices)
@@ -109,6 +115,10 @@ def main(gpunum,configfile):
         mind_d = int(settings[s,1])#1
         grid_sp = int(settings[s,2])#6
         disp_hw = int(settings[s,3])#4
+        if disp_hw > 6:
+            disp_hw = 6
+        if grid_sp < 3:
+            grid_sp = 3
 
         print('starting full run ',s,' out of 100')
         print('setting mind_r',mind_r,'mind_d',mind_d,'grid_sp',grid_sp,'disp_hw',disp_hw)
@@ -141,6 +151,13 @@ def main(gpunum,configfile):
 
                 n_ch = features_fix_smooth.shape[1]
                 t1 = time.time()
+
+                estimated_memory = estimate_memory_usage_MIND(H, W, D, n_ch, disp_hw, grid_sp)
+
+                if estimated_memory > MEMORY_THRESHOLD:
+                    print(f"Skipping configuration {s} due to memory constraints.")
+                    print('estimated memory',estimated_memory/(1024**3))
+                    continue
                 #with torch.cuda.amp.autocast(dtype=torch.bfloat16):
                 # compute correlation volume with SSD
                 torch.cuda.empty_cache()

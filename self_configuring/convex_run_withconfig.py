@@ -36,9 +36,14 @@ def get_data_train(topk,HWD,f_predict,f_gt):
     
     for i in topk:
         # Add CT images of expiration
-        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxx',str(i).zfill(3))).get_fdata()).float().cuda().contiguous()
+        #pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxx',str(i).zfill(3))).get_fdata()).float().cuda().contiguous()
+        #preds_fixed.append(pred_fixed)
+        #pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxx',str(i).zfill(3)).replace('exp', 'insp')).get_fdata()).float().cuda().contiguous()
+        #preds_fixed.append(pred_fixed)
+
+        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
-        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxx',str(i).zfill(3)).replace('exp', 'insp')).get_fdata()).float().cuda().contiguous()
+        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4)).replace('0000', str(1).zfill(4))).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
 
         # add MR images to the list
@@ -46,9 +51,14 @@ def get_data_train(topk,HWD,f_predict,f_gt):
         #preds_fixed.append(pred_fixed)
 
         # Add segmentation of expiration
-        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxx',str(i).zfill(3))).get_fdata()).float().cuda().contiguous()
+        #seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxx',str(i).zfill(3))).get_fdata()).float().cuda().contiguous()
+        #segs_fixed.append(seg_fixed)
+        #seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxx',str(i).zfill(3)).replace('exp', 'insp')).get_fdata()).float().cuda().contiguous()
+        #segs_fixed.append(seg_fixed)
+
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
-        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxx',str(i).zfill(3)).replace('exp', 'insp')).get_fdata()).float().cuda().contiguous()
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4)).replace('0000', str(1).zfill(4))).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
 
         #img_fixed =  torch.from_numpy(nib.load(l2r_base_folder+'AbdomenCTCT/imagesTr/AbdomenCTCT_00'+str(i).zfill(2)+'_0000.nii.gz').get_fdata()).float().cuda().contiguous()
@@ -109,64 +119,69 @@ def main(gpunum,configfile):
         print('starting full run ',s,' out of 100')
         print('setting nn_mult',nn_mult,'grid_sp',grid_sp,'disp_hw',disp_hw)
         for i in trange(len(topk_pair)):
-            ij = topk_pair[i]
+            try:
+                ij = topk_pair[i]
 
-            t0 = time.time()
+                t0 = time.time()
 
-            pred_fixed = preds_fixed[ij[0]].float()
-            pred_moving = preds_fixed[ij[1]].float()
-            seg_fixed = segs_fixed[ij[0]]
-            seg_moving = segs_fixed[ij[1]]
+                pred_fixed = preds_fixed[ij[0]].float()
+                pred_moving = preds_fixed[ij[1]].float()
+                seg_fixed = segs_fixed[ij[0]]
+                seg_moving = segs_fixed[ij[1]]
 
-            H, W, D = pred_fixed.shape
-            grid0 = F.affine_grid(torch.eye(3,4).unsqueeze(0).cuda(),(1,1,H,W,D),align_corners=False)
-            torch.cuda.synchronize()
-            t0 = time.time()
+                H, W, D = pred_fixed.shape
+                grid0 = F.affine_grid(torch.eye(3,4).unsqueeze(0).cuda(),(1,1,H,W,D),align_corners=False)
+                torch.cuda.synchronize()
+                t0 = time.time()
 
-            # compute features and downsample (using average pooling)
-            with torch.no_grad():
+                # compute features and downsample (using average pooling)
+                with torch.no_grad():
 
-                features_fix, features_mov = extract_features_nnunet(pred_fixed=pred_fixed,
-                                                              pred_moving=pred_moving,mult=nn_mult)
+                    features_fix, features_mov = extract_features_nnunet(pred_fixed=pred_fixed,
+                                                                pred_moving=pred_moving,mult=nn_mult)
 
-                features_fix_smooth = F.avg_pool3d(features_fix,grid_sp,stride=grid_sp)
-                features_mov_smooth = F.avg_pool3d(features_mov,grid_sp,stride=grid_sp)
+                    features_fix_smooth = F.avg_pool3d(features_fix,grid_sp,stride=grid_sp)
+                    features_mov_smooth = F.avg_pool3d(features_mov,grid_sp,stride=grid_sp)
 
-                n_ch = features_fix_smooth.shape[1]
-                t1 = time.time()
-                #with torch.cuda.amp.autocast(dtype=torch.bfloat16):
-                # compute correlation volume with SSD
-                torch.cuda.empty_cache()
-                ssd,ssd_argmin = correlate(features_fix_smooth,features_mov_smooth,disp_hw,grid_sp,(H,W,D), n_ch)
-
-                # provide auxiliary mesh grid
-                disp_mesh_t = F.affine_grid(disp_hw*torch.eye(3,4).cuda().half().unsqueeze(0),(1,1,disp_hw*2+1,disp_hw*2+1,disp_hw*2+1),align_corners=True).permute(0,4,1,2,3).reshape(3,-1,1)
-
-                # perform coupled convex optimisation
-                disp_soft = coupled_convex(ssd,ssd_argmin,disp_mesh_t,grid_sp,(H,W,D))
-
-                # if "ic" flag is set: make inverse consistent
-                scale = torch.tensor([H//grid_sp-1,W//grid_sp-1,D//grid_sp-1]).view(1,3,1,1,1).cuda().half()/2
-                torch.cuda.empty_cache()
-
-                ssd_,ssd_argmin_ = correlate(features_mov_smooth,features_fix_smooth,disp_hw,grid_sp,(H,W,D), n_ch)
-                
-                disp_soft_ = coupled_convex(ssd_,ssd_argmin_,disp_mesh_t,grid_sp,(H,W,D))
-                disp_ice,_ = inverse_consistency((disp_soft/scale).flip(1),(disp_soft_/scale).flip(1),iter=15)
-
-                disp_hr = F.interpolate(disp_ice.flip(1)*scale*grid_sp,size=(H,W,D),mode='trilinear',align_corners=False)
-                t2 = time.time()
-
-                scale1 = torch.tensor([D-1,W-1,H-1]).cuda()/2
-
-                #lms_fix1 = (lms_fixed.flip(1)/scale1-1).cuda().view(1,-1,1,1,3)
-                #disp_sampled = F.grid_sample(disp_hr.float().cuda(),lms_fix1).squeeze().t().cpu().data
-                jac_det = jacobian_determinant_3d(disp_hr.float(),False)
-                try:
-                    del ssd, ssd_argmin
+                    n_ch = features_fix_smooth.shape[1]
+                    t1 = time.time()
+                    #with torch.cuda.amp.autocast(dtype=torch.bfloat16):
+                    # compute correlation volume with SSD
                     torch.cuda.empty_cache()
-                except Exception as e:
-                    print(f"Memory cleanup failed: {e}")
+                    ssd,ssd_argmin = correlate(features_fix_smooth,features_mov_smooth,disp_hw,grid_sp,(H,W,D), n_ch)
+
+                    # provide auxiliary mesh grid
+                    disp_mesh_t = F.affine_grid(disp_hw*torch.eye(3,4).cuda().half().unsqueeze(0),(1,1,disp_hw*2+1,disp_hw*2+1,disp_hw*2+1),align_corners=True).permute(0,4,1,2,3).reshape(3,-1,1)
+
+                    # perform coupled convex optimisation
+                    disp_soft = coupled_convex(ssd,ssd_argmin,disp_mesh_t,grid_sp,(H,W,D))
+
+                    # if "ic" flag is set: make inverse consistent
+                    scale = torch.tensor([H//grid_sp-1,W//grid_sp-1,D//grid_sp-1]).view(1,3,1,1,1).cuda().half()/2
+                    torch.cuda.empty_cache()
+
+                    ssd_,ssd_argmin_ = correlate(features_mov_smooth,features_fix_smooth,disp_hw,grid_sp,(H,W,D), n_ch)
+                    
+                    disp_soft_ = coupled_convex(ssd_,ssd_argmin_,disp_mesh_t,grid_sp,(H,W,D))
+                    disp_ice,_ = inverse_consistency((disp_soft/scale).flip(1),(disp_soft_/scale).flip(1),iter=15)
+
+                    disp_hr = F.interpolate(disp_ice.flip(1)*scale*grid_sp,size=(H,W,D),mode='trilinear',align_corners=False)
+                    t2 = time.time()
+
+                    scale1 = torch.tensor([D-1,W-1,H-1]).cuda()/2
+
+                    #lms_fix1 = (lms_fixed.flip(1)/scale1-1).cuda().view(1,-1,1,1,3)
+                    #disp_sampled = F.grid_sample(disp_hr.float().cuda(),lms_fix1).squeeze().t().cpu().data
+                    jac_det = jacobian_determinant_3d(disp_hr.float(),False)
+                    try:
+                        del ssd, ssd_argmin
+                        torch.cuda.empty_cache()
+                    except Exception as e:
+                        print(f"Memory cleanup failed: {e}")
+            except torch.cuda.OutOfMemoryError:
+                print(f"Out of memory error occurred. Skipping configuration {s}.")
+                torch.cuda.empty_cache()
+                continue
 
                 
             seg_warped = F.grid_sample(seg_moving.view(1,1,H,W,D),grid0+disp_hr.permute(0,2,3,4,1).flip(-1).div(scale1),mode='nearest').squeeze()

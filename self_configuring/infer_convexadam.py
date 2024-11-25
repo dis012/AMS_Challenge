@@ -33,6 +33,7 @@ def get_data_train(topk,HWD,f_predict,f_gt):
 
     for i in topk:
         file_pred = f_predict.replace('xxxx',str(i).zfill(4))
+        #file_pred = f_predict.replace('xxx',str(i).zfill(3))
         #file_seg = f_gt.replace('xxxx',str(i).zfill(4)) #not available for test-scans
         
         pred_fixed = torch.from_numpy(nib.load(file_pred).get_fdata()).float().cuda().contiguous()
@@ -40,10 +41,15 @@ def get_data_train(topk,HWD,f_predict,f_gt):
         segs_fixed.append(None)#seg_fixed)
         preds_fixed.append(pred_fixed)
 
-        # Se MR slike za ta primer
-        file_pred = f_predict.replace('CT','MR').replace('xxxx',str(i).zfill(4))
+        file_pred = f_gt.replace('0000',str(1).zfill(4))
+        #file_pred = file_pred.replace('exp','insp')
         pred_fixed = torch.from_numpy(nib.load(file_pred).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
+
+        # Se MR slike za ta primer
+        #file_pred = f_predict.replace('CT','MR').replace('xxxx',str(i).zfill(4))
+        #pred_fixed = torch.from_numpy(nib.load(file_pred).get_fdata()).float().cuda().contiguous()
+        #preds_fixed.append(pred_fixed)
         
     return preds_fixed,segs_fixed
 
@@ -168,7 +174,7 @@ def main(gpunum,configfile,convex_s,adam_s1,adam_s2):
         #file_field = stem+'/fieldsTs/'+file.replace(stem,'disp').replace('0000',str(int(topk[topk_pair[i][1]])).zfill(4)).replace('xxxx',str(int(topk[topk_pair[i][0]])).zfill(4))
 
         # Drugacen output folder
-        file_field = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/InferConvexAdamOutput/"
+        file_field = "/home/adis/Desktop/Faks/AMS/AMS_Challenge/Results/AMS_Images/DisplacementFieldUNet/"
         #fixed_idx = str(int(topk[topk_pair[i][0]])).zfill(4)
         #moving_idx = str(int(topk[topk_pair[i][1]])).zfill(4)
         img_idx = str(int(topk[i])).zfill(4)

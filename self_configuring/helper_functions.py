@@ -22,6 +22,42 @@ def estimate_memory_usage(nn_mult, grid_sp, disp_hw, H, W, D):
     total_memory = size_mind_fix + size_mind_mov + size_ssd
     return total_memory
 
+def estimate_memory_usage_MIND(H, W, D, n_ch, disp_hw, grid_sp):
+    """
+    Estimate GPU memory usage for MIND descriptor correlation.
+    
+    Parameters:
+    - H, W, D: Dimensions of the input image.
+    - n_ch: Number of feature channels in MIND descriptors.
+    - disp_hw: Displacement half-width for correlation.
+    - grid_sp: Grid spacing (downsampling factor).
+    
+    Returns:
+    - Estimated memory usage in bytes.
+    """
+    # Downsampled spatial dimensions
+    H_d = H // grid_sp
+    W_d = W // grid_sp
+    D_d = D // grid_sp
+    
+    # Displacement search space size
+    disp_size = (disp_hw * 2 + 1) ** 3
+    
+    # Memory for SSD tensor (float32: 4 bytes per value)
+    ssd_memory = disp_size * H_d * W_d * D_d * 4
+    
+    # Memory for padded moving feature map (n_ch channels)
+    padded_mov_memory = n_ch * (H + 2 * disp_hw) * (W + 2 * disp_hw) * (D + 2 * disp_hw) * 4
+    
+    # Memory for intermediate tensors during SSD computation
+    intermediate_memory = n_ch * H_d * W_d * D_d * 4
+    
+    # Total memory
+    total_memory = ssd_memory + padded_mov_memory + intermediate_memory
+    return total_memory
+
+
+
 print(estimate_memory_usage(12, 2, 5, 192, 192, 208)/(1024**3))
 
 def get_common_bounding_box(data1, data2, threshold1=-900, threshold2=10):
