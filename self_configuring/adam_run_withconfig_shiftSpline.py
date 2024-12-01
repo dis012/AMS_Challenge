@@ -15,9 +15,9 @@ import cupy
 from cupyx.scipy.ndimage import distance_transform_edt
 from tqdm.auto import trange,tqdm
 
-from .convexAdam_hyper_util import MINDSSC, correlate, coupled_convex, inverse_consistency, dice_coeff,extract_features, sort_rank, jacobian_determinant_3d, kovesi_spline, GaussianSmoothing, gpu_usage, extract_features_nnunet,cupy_hd95
+from convexAdam_hyper_util import MINDSSC, correlate, coupled_convex, inverse_consistency, dice_coeff,extract_features, sort_rank, jacobian_determinant_3d, kovesi_spline, GaussianSmoothing, gpu_usage, extract_features_nnunet,cupy_hd95
 
-from .helper_functions import estimate_memory_usage
+from helper_functions import estimate_memory_usage
 
 # Define a memory threshold (e.g., 9 GB for a 12 GB GPU)
 MEMORY_THRESHOLD = 9 * 1024 ** 3  # 9 GB in bytes
@@ -41,15 +41,15 @@ def get_data_train(topk,HWD,f_predict,f_gt):
         #segs_fixed.append(seg_fixed)
         #img_fixed =  torch.from_numpy(nib.load(l2r_base_folder+'AbdomenCTCT/imagesTr/AbdomenCTCT_00'+str(i).zfill(2)+'_0000.nii.gz').get_fdata()).float().cuda().contiguous()
         #preds_fixed.append(pred_fixed)
-        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxx',str(i).zfill(3))).get_fdata()).float().cuda().contiguous()
+        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
-        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxx',str(i).zfill(3)).replace('exp', 'insp')).get_fdata()).float().cuda().contiguous()
+        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4)).replace('0000', str(1).zfill(4))).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
 
         # same for the segmentation
-        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxx',str(i).zfill(3))).get_fdata()).float().cuda().contiguous()
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
-        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxx',str(i).zfill(3)).replace('exp', 'insp')).get_fdata()).float().cuda().contiguous()
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4)).replace('0000', str(1).zfill(4))).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
     return preds_fixed,segs_fixed
 
@@ -72,7 +72,7 @@ def main(gpunum,configfile,convex_s):
     for ij in topk_pair:
         dice = dice_coeff(segs_fixed[ij[0]],segs_fixed[ij[1]],num_labels+1)
         robust30.append(dice.topk(max(1,int(config['num_labels']*.3)),largest=False).indices)
-
+               
 
     torch.manual_seed(1004)
     settings = (torch.rand(100,3)*torch.tensor([6,4,6])+torch.tensor([.5,1.5,1.5])).round()
