@@ -10,6 +10,7 @@ from self_configuring.infer_convexadam import main as get_displacement_field_Une
 from self_configuring.convex_run_paired_mind import main as convex_run_MIND
 from self_configuring.adam_run_paired_mind_shiftSpline import main as adam_run_MIND
 from self_configuring.main_for_l2r3_MIND_testset import main as get_displacement_field_MIND
+from self_configuring.helper_functions import apply_displacement_field 
 import cmd
 
 
@@ -49,12 +50,12 @@ class MyPrompt(cmd.Cmd):
             "  get_displacement_field_Unet(gpu_id, path_to_config_file, convex_s, adam_s1, adam_s2) - Get displacement field"
         )
         print(
-            "  get_displacement_field_MIND(gpu_id, path_to_config_file, convex_s, adam_s1, adam_s2) - Get displacement field"
+            "  get_displacement_field_MIND(task, mindr, mindd, usemask, lambda, gridsp, disphw, iterations, smoothnes, data, results) - Get displacement field"
         )
         print("\n")
         print("Other commands:")
         print(
-            "  apply_displacement_field(path_to_img1, path_to_img2, path_to_displacement_field, path_to_result_folder) - Apply displacement field to an image"
+            "  apply_displacement_field(path_to_fixed, path_to_moving, path_to_displacement_field, path_to_result_folder) - Apply displacement field to an image"
         )
         print(
             "  display_parameters() - Show meaning of parameters needed for each function"
@@ -144,6 +145,16 @@ class MyPrompt(cmd.Cmd):
             selected_smooth,
             data_dir,
             result_path,
+        )
+
+    def do_apply_displacement_field(self, arg):
+        """Apply displacement field to an image."""
+        path_to_fixed = input("Enter path to fixed image: ")
+        path_to_moving = input("Enter path to moving image: ")
+        path_to_displacement_field = input("Enter path to displacement field: ")
+        path_to_result_folder = input("Enter path to result folder: ")
+        apply_displacement_field(
+            path_to_fixed, path_to_moving, path_to_displacement_field, path_to_result_folder
         )
 
 if __name__ == "__main__":

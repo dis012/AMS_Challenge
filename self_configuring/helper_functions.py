@@ -2,6 +2,8 @@ import torch
 import matplotlib.pyplot as plt
 import nibabel as nib
 import torch.nn.functional as F
+import SimpleITK as sitk
+import numpy as np
 
 
 def estimate_memory_usage(nn_mult, grid_sp, disp_hw, H, W, D):
@@ -150,3 +152,46 @@ def downsample_image(image, scale_factor=None, target_size=None, mode="nearest")
     # Remove batch and channel dimensions
     downsampled_image = downsampled_image.squeeze(0).squeeze(0)
     return downsampled_image
+
+def apply_displacement_field(img1, img2, disp, result):
+    img1 = sitk.ReadImage(img1)
+    img2 = sitk.ReadImage(img2)
+    disp = sitk.ReadImage(disp)
+
+    img1_array = sitk.GetArrayFromImage(img1)
+    img2_array = sitk.GetArrayFromImage(img2)
+    disp_array = sitk.GetArrayFromImage(disp)
+
+    disp_array = np.transpose(disp_array, (1, 2, 3, 0))
+
+    disp_vector = sitk.GetImageFromArray(disp_array, isVector=True)
+
+    disp_vector.CopyInformation(img2)
+
+    disp_vector = sitk.Cast(disp_vector, sitk.sitkVectorFloat64)
+
+    disp_transform = sitk.DisplacementFieldTransform(disp_vector)
+
+    warped_img = sitk.Resample(img2, img1, disp_transform, sitk.sitkBSpline, 0.0, img2.GetPixelID())
+
+    warped_img_array = sitk.GetArrayFromImage(warped_img)
+
+    diff = img1_array - warped_img_array
+
+    sitk.WriteImage(warped_img, result + "/warped_img.nii.gz")
+
+    slice_index = warped_img_array.shape[0] // 2
+
+    img1_slice = img1_array[:, :, slice_index]
+    img2_slice = img2_array[:, :, slice_index]
+    warped_img_slice = warped_img_array[:, :, slice_index]
+
+    plt.imshow(img1_slice, cmap="gray")
+    plt.imshow(img2_slice, cmap="jet", alpha=0.5)
+    plt.show()
+
+    plt.imshow(img1_slice, cmap="gray")
+    plt.imshow(warped_img_slice, cmap="jet", alpha=0.5)
+    plt.show()
+
+

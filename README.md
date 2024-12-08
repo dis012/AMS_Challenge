@@ -35,7 +35,7 @@ The evaluation was performed on the **AMS Challenge** dataset and Grand Challeng
 ## **2. MIND-Based Registration**
 
 ### **Results on AMS Challenge Data**
-- **TRE**: 4.1468
+- **TRE**: 3.924
 - **jstd**: 0.0653
 
 ### **Commentary on MIND Results**
