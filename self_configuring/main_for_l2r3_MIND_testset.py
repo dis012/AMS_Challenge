@@ -5,7 +5,7 @@ import warnings
 
 import nibabel as nib
 import torch
-from convex_adam_MIND_testset import *
+from .convex_adam_MIND_testset import *
 
 warnings.filterwarnings("ignore")
 

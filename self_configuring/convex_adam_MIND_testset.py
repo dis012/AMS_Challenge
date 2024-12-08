@@ -7,8 +7,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from scipy.ndimage import zoom as zoom
 
-from convexAdam.convex_adam_MIND import extract_features
-from convexAdam.convex_adam_utils import (correlate, coupled_convex,
+from src.convexAdam.convex_adam_MIND import extract_features
+from src.convexAdam.convex_adam_utils import (correlate, coupled_convex,
                                           inverse_consistency)
 
 warnings.filterwarnings("ignore")

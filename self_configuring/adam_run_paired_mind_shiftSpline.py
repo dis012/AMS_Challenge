@@ -15,7 +15,7 @@ import cupy
 from cupyx.scipy.ndimage import distance_transform_edt
 from tqdm.auto import trange,tqdm
 
-from convexAdam_hyper_util import MINDSSC, correlate, coupled_convex, inverse_consistency, dice_coeff,extract_features, sort_rank, jacobian_determinant_3d, kovesi_spline, GaussianSmoothing, gpu_usage, extract_features_nnunet,cupy_hd95
+from .convexAdam_hyper_util import MINDSSC, correlate, coupled_convex, inverse_consistency, dice_coeff,extract_features, sort_rank, jacobian_determinant_3d, kovesi_spline, GaussianSmoothing, gpu_usage, extract_features_nnunet,cupy_hd95
 
                         
 def get_data_train(topk,HWD,f_img,f_key,f_mask):

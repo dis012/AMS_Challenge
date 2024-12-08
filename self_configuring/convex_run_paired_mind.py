@@ -15,9 +15,9 @@ import cupy
 from cupyx.scipy.ndimage import distance_transform_edt
 from tqdm.auto import trange,tqdm
 
-from convexAdam_hyper_util import MINDSSC, correlate, coupled_convex, inverse_consistency, dice_coeff,extract_features, sort_rank, jacobian_determinant_3d, kovesi_spline, GaussianSmoothing, gpu_usage, extract_features_nnunet,cupy_hd95
+from .convexAdam_hyper_util import MINDSSC, correlate, coupled_convex, inverse_consistency, dice_coeff,extract_features, sort_rank, jacobian_determinant_3d, kovesi_spline, GaussianSmoothing, gpu_usage, extract_features_nnunet,cupy_hd95
 
-from helper_functions import estimate_memory_usage_MIND
+from .helper_functions import estimate_memory_usage_MIND
 
 MEMORY_THRESHOLD = 9 * 1024 ** 3  # 9 GB in bytes
             
