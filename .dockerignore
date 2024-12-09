@@ -1,0 +1,27 @@
+# Exclude virtual environment
+venv/
+
+# Exclude old/ directory
+old/
+
+# Exclude Python cache and MyPy cache
+__pycache__/
+.mypy_cache/
+
+# Exclude specific directories and files
+images/
+Data/
+Results/
+
+# Exclude Git-related files and directories
+.git/
+.gitignore
+
+# Exclude development and documentation files
+DisplayImage.ipynb
+LICENSE
+README.md
+
+# Exclude log and temporary files
+*.log
+*.tmp

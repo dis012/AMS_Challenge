@@ -3,3 +3,6 @@ numpy
 scikit-learn
 SimpleITK
 torch
+cupy
+tqdm
+matplotlib
