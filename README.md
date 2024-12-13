@@ -269,6 +269,8 @@ The optimization was run on an NVIDIA GeForce RTX 3060 12GB. Some configurations
 
 ## **2. MIND-Based Registration**
 
+### Results obtained during optimization
+
 ### **Results on AMS Challenge Data**
 - **TRE**: 3.924
 - **jstd**: 0.0653
@@ -320,6 +322,59 @@ In summary, the U-Net model delivers better performance for both AMS Challenge a
 ![Difference Image](images/MINDDiff.png)
 
 ---
+
+### Results from provided code
+```bash
+case_results [0] [0011_0001<--0011_0000']:
+        LogJacDetStd        : 0.05703
+        num_foldings        : 0.00000
+        TRE_kp              : 5.13669
+        TRE_lm              : 4.95030
+        DSC                 : 0.61423
+        HD95                : 36.99551
+case_results [1] [0012_0001<--0012_0000']:
+        LogJacDetStd        : 0.08178
+        num_foldings        : 0.00000
+        TRE_kp              : 4.97068
+        TRE_lm              : 4.23266
+        DSC                 : 0.61908
+        HD95                : 34.97424
+case_results [2] [0013_0001<--0013_0000']:
+        LogJacDetStd        : 0.04711
+        num_foldings        : 0.00000
+        TRE_kp              : 7.59544
+        TRE_lm              : 3.88136
+        DSC                 : 0.39952
+        HD95                : 66.93747
+case_results [3] [0011_0002<--0011_0000']:
+        LogJacDetStd        : 0.08626
+        num_foldings        : 0.00000
+        TRE_kp              : 5.86606
+        TRE_lm              : 5.09382
+        DSC                 : 0.39045
+        HD95                : 52.08100
+case_results [4] [0012_0002<--0012_0000']:
+        LogJacDetStd        : 0.06540
+        num_foldings        : 0.00000
+        TRE_kp              : 5.80599
+        TRE_lm              : 5.81913
+        DSC                 : 0.60830
+        HD95                : 35.12312
+case_results [5] [0013_0002<--0013_0000']:
+        LogJacDetStd        : 0.05755
+        num_foldings        : 0.00000
+        TRE_kp              : 7.47627
+        TRE_lm              : 3.64730
+        DSC                 : 0.40928
+        HD95                : 66.02607
+
+ aggregated_results:
+        LogJacDetStd        : 0.06586 +- 0.01396 | 30%: 0.07359
+        TRE_kp              : 6.14186 +- 1.03798 | 30%: 6.67116
+        TRE_lm              : 4.60410 +- 0.75407 | 30%: 5.02206
+        DSC                 : 0.50681 +- 0.10724 | 30%: 0.40440
+        HD95                : 48.68957 +- 13.86814 | 30%: 36.05931
+```
 
 ## **Conclusion**
 

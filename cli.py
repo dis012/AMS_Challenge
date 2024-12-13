@@ -131,7 +131,7 @@ class MyPrompt(cmd.Cmd):
         disp_hw = int(input("Enter disp_hw: "))
         selected_niter = int(input("Enter selected_niter: "))
         selected_smooth = int(input("Enter selected_smooth: "))
-        data_dir = "app/Data/"
+        data_dir = "/app/Data/"
         result_path = "/app/Results/DisplacementFieldMIND/"
         get_displacement_field_MIND(
             task_name,

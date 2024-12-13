@@ -100,7 +100,7 @@ def main(
             task_name,
             "results_testset",
             "disp_{}_{}".format(
-                pair["fixed"][-16:-12], pair["moving"][-16:-12] + ".nii.gz"
+                pair["fixed"][-16:-7], pair["moving"][-16:-7] + ".nii.gz"
             ),
         )
         disp_nii = nib.Nifti1Image(displacements, affine)

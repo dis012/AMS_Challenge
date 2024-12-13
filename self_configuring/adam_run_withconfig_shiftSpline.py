@@ -45,11 +45,15 @@ def get_data_train(topk,HWD,f_predict,f_gt):
         preds_fixed.append(pred_fixed)
         pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4)).replace('0000', str(1).zfill(4))).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
+        pred_fixed = torch.from_numpy(nib.load(f_predict.replace('xxxx',str(i).zfill(4)).replace('0000', str(2).zfill(4))).get_fdata()).float().cuda().contiguous()
+        preds_fixed.append(pred_fixed)
 
         # same for the segmentation
         seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4))).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
         seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4)).replace('0000', str(1).zfill(4))).get_fdata()).float().cuda().contiguous()
+        segs_fixed.append(seg_fixed)
+        seg_fixed = torch.from_numpy(nib.load(f_gt.replace('xxxx',str(i).zfill(4)).replace('0000', str(2).zfill(4))).get_fdata()).float().cuda().contiguous()
         segs_fixed.append(seg_fixed)
     return preds_fixed,segs_fixed
 

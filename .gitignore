@@ -153,6 +153,10 @@ Results/Optimization_test_aligment
 Results/Output/
 Results/OutputAdamJac/
 Results/OutputAdamOptimization/
+Results/UNet/optimized_params.pt
+Results/UNet/optimized_params_adam.pt
+Results/UNet/jac_params.pt
+Results/DisplacementFieldMIND/test/
 
 # macOS
 .DS_Store

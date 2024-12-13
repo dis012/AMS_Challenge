@@ -46,6 +46,11 @@ def get_data_train(topk,HWD,f_predict,f_gt):
         pred_fixed = torch.from_numpy(nib.load(file_pred).get_fdata()).float().cuda().contiguous()
         preds_fixed.append(pred_fixed)
 
+        file_pred = f_gt.replace('0000',str(2).zfill(4))
+        #file_pred = file_pred.replace('exp','insp')
+        pred_fixed = torch.from_numpy(nib.load(file_pred).get_fdata()).float().cuda().contiguous()
+        preds_fixed.append(pred_fixed)
+
         # Se MR slike za ta primer
         #file_pred = f_predict.replace('CT','MR').replace('xxxx',str(i).zfill(4))
         #pred_fixed = torch.from_numpy(nib.load(file_pred).get_fdata()).float().cuda().contiguous()
@@ -167,6 +172,7 @@ def main(gpunum,configfile,convex_s,adam_s1,adam_s2):
     hd95_2 = torch.zeros(len(topk_pair),eval_labels)
 
     dice_ident = torch.zeros(len(topk_pair),eval_labels)
+    j = 0
 
     for i in trange(len(topk_pair)):
         file = config['f_gt'].split('/')[-1]
@@ -177,8 +183,16 @@ def main(gpunum,configfile,convex_s,adam_s1,adam_s2):
         file_field = "/app/Results/DisplacementFieldUNet/"
         #fixed_idx = str(int(topk[topk_pair[i][0]])).zfill(4)
         #moving_idx = str(int(topk[topk_pair[i][1]])).zfill(4)
-        img_idx = str(int(topk[i])).zfill(4)
-        file_name = f"disp_{img_idx}_to_{img_idx}.nii.gz"
+
+        if i > 0 and i % 2 == 0:
+            j += 1
+        
+        print("Woking on: ", topk[j])
+        img_idx = str(int(topk[j])).zfill(4)
+        img2_idx = "0001"
+        if (i+1)%2==0:
+            img2_idx = "0002"
+        file_name = f"disp_{img_idx}_{img2_idx}_{img_idx}_0000.nii.gz"
         file_field = os.path.join(file_field, file_name)
 
         print('writing output-nii to ',file_field)
