@@ -154,6 +154,14 @@ def downsample_image(image, scale_factor=None, target_size=None, mode="nearest")
     return downsampled_image
 
 def apply_displacement_field(img1, img2, disp, result):
+    """
+    Apply displacement field to an image.
+
+    :param img1: Path to the fixed image
+    :param img2: Path to the moving image
+    :param disp: Path to the displacement field
+    :param result: Path to save the result
+    """
     img1 = sitk.ReadImage(img1)
     img2 = sitk.ReadImage(img2)
     disp = sitk.ReadImage(disp)

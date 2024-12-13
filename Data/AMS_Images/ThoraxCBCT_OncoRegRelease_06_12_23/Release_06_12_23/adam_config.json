@@ -1,0 +1,14 @@
+{
+    "topk": ["0001", "0002", "0003", "0004", "0005", "0006", "0007", "0008", "0009", "0010"],  
+    "HWD": [256, 192, 192], 
+    "f_img": "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/imagesTr/ThoraxCBCT_xxxx_0000.nii.gz",  
+    "f_key": "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/keypoints01Tr/ThoraxCBCT_xxxx_0000.csv",  
+    "f_mask": "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/masksTr/ThoraxCBCT_xxxx_0000.nii.gz",  
+    "output_adam": "/app/Results/MIND/results_adam.pth",  
+    "topk_pair": [
+      [0, 1],
+      [2, 3],
+      [4, 5],
+      [6, 7]
+    ]
+}

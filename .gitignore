@@ -132,10 +132,27 @@ dmypy.json
 .pyre/
 
 # Data
-Data/
-Results/
-Results2/
-Data2/
+Data/Abdomen/
+Data/BrainMR/
+Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/imagesTr
+Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/keypoints01Tr/
+Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/keypoints02Tr/
+Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/labelsTr/
+Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/landmarks01Tr
+Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/landmarks02Tr
+Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/masksTr
+Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/info.txt
+Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/ThoraxCBCT_dataset.json
+
+Results/AMS_Images/
+Results/CliTest/
+Results/CT_CT/
+Results/InferConvexAdamOutput
+Results/initial_test
+Results/Optimization_test_aligment
+Results/Output/
+Results/OutputAdamJac/
+Results/OutputAdamOptimization/
 
 # macOS
 .DS_Store

@@ -26,7 +26,8 @@ def main(
     task_dir = os.path.join(data_dir, task_name)
     # dataset_json = os.path.join(task_dir, task_name + "_dataset.json")
     # My custom dataset_json path
-    dataset_json = os.path.join(data_dir, "dataset.json")
+    #dataset_json = os.path.join(data_dir, "dataset.json")
+    dataset_json = "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/dataset.json"
 
     with open(dataset_json, "r") as f:
         data = json.load(f)

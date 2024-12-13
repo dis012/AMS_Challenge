@@ -1,0 +1,15 @@
+{
+    "topk": ["0011", "0012", "0013"],
+    "topk_pair": [
+        [0,1],
+        [2,3],
+        [4,5]
+    ],
+    "num_labels": 14,
+    "HWD": [256, 192, 192],
+    "f_predict": "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/labelsTr/ThoraxCBCT_xxxx_0000.nii.gz",
+    "f_gt": "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/labelsTr/ThoraxCBCT_xxxx_0000.nii.gz",
+    "output": "/app/Results/UNet/optimized_params.pt",
+    "output_adam": "/app/Results/UNet/optimized_params_adam.pt",
+    "output_jac": "/app/Results/UNet/jac_params.pt"
+}

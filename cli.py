@@ -88,20 +88,20 @@ class MyPrompt(cmd.Cmd):
     def do_convex_run_Unet(self, arg):
         """Run Convex optimization."""
         gpu_id = int(input("Enter GPU ID: "))
-        path_to_config_file = input("Enter path to config file: ")
+        path_to_config_file = "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/convex_config_unet.json"
         convex_run_Unet(gpu_id, path_to_config_file)
 
     def do_adam_run_Unet(self, arg):
         """Run Adam optimization."""
         gpu_id = int(input("Enter GPU ID: "))
-        path_to_config_file = input("Enter path to config file: ")
+        path_to_config_file = "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/convex_config_unet.json"
         convex_s = int(input("Enter convex_s: "))
         adam_run_Unet(gpu_id, path_to_config_file, convex_s)
 
     def do_get_displacement_field_Unet(self, arg):
         """Get displacement field."""
         gpu_id = int(input("Enter GPU ID: "))
-        path_to_config_file = input("Enter path to config file: ")
+        path_to_config_file = "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/ConfigDisplacementFieldUNet.json"
         convex_s = int(input("Enter convex_s: "))
         adam_s1 = int(input("Enter adam_s1: "))
         adam_s2 = int(input("Enter adam_s2: "))
@@ -110,13 +110,13 @@ class MyPrompt(cmd.Cmd):
     def do_convex_run_MIND(self, arg):
         """Run Convex optimization."""
         gpu_id = int(input("Enter GPU ID: "))
-        path_to_config_file = input("Enter path to config file: ")
+        path_to_config_file = "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/convex_config.json"
         convex_run_MIND(gpu_id, path_to_config_file)
 
     def do_adam_run_MIND(self, arg):
         """Run Adam optimization."""
         gpu_id = int(input("Enter GPU ID: "))
-        path_to_config_file = input("Enter path to config file: ")
+        path_to_config_file = "/app/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/adam_config.json"
         convex_s = int(input("Enter convex_s: "))
         adam_run_MIND(gpu_id, path_to_config_file, convex_s)
 
@@ -131,8 +131,8 @@ class MyPrompt(cmd.Cmd):
         disp_hw = int(input("Enter disp_hw: "))
         selected_niter = int(input("Enter selected_niter: "))
         selected_smooth = int(input("Enter selected_smooth: "))
-        data_dir = input("Enter data directory: ")
-        result_path = input("Enter result path: ")
+        data_dir = "app/Data/"
+        result_path = "/app/Results/DisplacementFieldMIND/"
         get_displacement_field_MIND(
             task_name,
             mind_r,
@@ -152,7 +152,7 @@ class MyPrompt(cmd.Cmd):
         path_to_fixed = input("Enter path to fixed image: ")
         path_to_moving = input("Enter path to moving image: ")
         path_to_displacement_field = input("Enter path to displacement field: ")
-        path_to_result_folder = input("Enter path to result folder: ")
+        path_to_result_folder = "/app/Results/WarpedImages/"
         apply_displacement_field(
             path_to_fixed, path_to_moving, path_to_displacement_field, path_to_result_folder
         )

@@ -1,0 +1,29 @@
+{
+    "registration_test" : [
+      {
+        "fixed": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/imagesTr/ThoraxCBCT_0000_0000.nii.gz",
+        "moving": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/imagesTr/ThoraxCBCT_0000_0001.nii.gz",
+        "fixed_mask": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/masksTr/ThoraxCBCT_0000_0000.nii.gz",
+        "moving_mask": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/masksTr/ThoraxCBCT_0000_0001.nii.gz"
+      },
+      {
+        "fixed": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/imagesTr/ThoraxCBCT_0001_0000.nii.gz",
+        "moving": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/imagesTr/ThoraxCBCT_0001_0001.nii.gz",
+        "fixed_mask": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/masksTr/ThoraxCBCT_0001_0000.nii.gz",
+        "moving_mask": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/masksTr/ThoraxCBCT_0001_0001.nii.gz"
+      },
+      {
+        "fixed": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/imagesTr/ThoraxCBCT_0013_0000.nii.gz",
+        "moving": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/imagesTr/ThoraxCBCT_0013_0001.nii.gz",
+        "fixed_mask": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/masksTr/ThoraxCBCT_0013_0000.nii.gz",
+        "moving_mask": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/masksTr/ThoraxCBCT_0013_0001.nii.gz"
+      },
+      {
+        "fixed": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/imagesTr/ThoraxCBCT_0010_0000.nii.gz",
+        "moving": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/imagesTr/ThoraxCBCT_0010_0001.nii.gz",
+        "fixed_mask": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/masksTr/ThoraxCBCT_0010_0000.nii.gz",
+        "moving_mask": "AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/masksTr/ThoraxCBCT_0010_0001.nii.gz"
+      }
+    ]
+  }
+  
