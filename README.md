@@ -295,21 +295,28 @@ In summary, the U-Net model delivers better performance for both AMS Challenge a
 2. **After Registration**: The CT scans after applying the registration model.
 3. **Difference Image**: A difference image highlighting misalignments.
 
-### Example Visualization Section
-
 **U-Net Model Results on CT expiration/inspiration**:
+
 ![Before Registration](images/CTBefore.png)
+
 ![After Registration](images/CTAfter.png)
+
 ![Difference Image](images/CTDiff.png)
 
 **U-Net Model Results on AMS Challenge Data**:
+
 ![Before Registration](images/AMSBefore.png)
+
 ![After Registration](images/AMSAfter.png)
+
 ![Difference Image](images/AMSDiff.png)
 
 **MIND Model Results on AMS Challenge Data**:
+
 ![Before Registration](images/MINDBefore.png)
+
 ![After Registration](images/MINDAfter.png)
+
 ![Difference Image](images/MINDDiff.png)
 
 ---
