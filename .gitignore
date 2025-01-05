@@ -157,6 +157,8 @@ Results/UNet/optimized_params.pt
 Results/UNet/optimized_params_adam.pt
 Results/UNet/jac_params.pt
 Results/DisplacementFieldMIND/test/
+Results/DisplacementFieldMIND
+Results/DisplacementFieldUNet
 
 # macOS
 .DS_Store

@@ -155,13 +155,97 @@ The project is built using Docker. Use the provided Dockerfile to create a Docke
 
 ### **2. The CLI tool**
 Once the container is running, use the CLI tool to interact with the models. The CLI provides commands for running convex and Adam optimization, generating displacement fields, and applying them to images.
+After you write one of the available commands the program will ask you to input parameters that are described bellow.
 
-You can run help command and all available commands will be displayed
+#### Available Commands
 
-When you run the command the program will ask you for some extra parameters.
+#### **1. Convex optimization with UNet**
+Performs convex optimization on segmented images using UNet.
+Parameters:
+    gpu_id: ID of the GPU to use.
+```bash
+convex_run_Unet
+```
+
+#### **2. Adam Optimization with UNet**
+Refines displacement fields using Adam optimization for segmented images.
+Parameters:
+    gpu_id: ID of the GPU to use.
+    convex_s: Index of the optimal settings from Convex optimization. -> The index is returned after convex_run_Unet is completed. It is also saved in the results folder
+```bash
+adam_run_Unet
+```
+
+#### **3. Convex Optimization with MIND**
+Performs convex optimization using MIND descriptors for multi-modal registration.
+Parameters:
+    gpu_id: ID of the GPU to use.
+```bash
+convex_run_MIND
+```
+
+#### **4. Adam Optimization with MIND**
+Refines displacement fields using Adam optimization for MIND descriptors.
+Parameters:
+   gpu_id: ID of the GPU to use.
+   convex_s: Index of the optimal settings from the convex optimization step.
+```bash
+adam_run_MIND
+```
+
+#### **5. Get Displacement fields**
+**The main functions you want to use for testing. Make sure the your configuration file is in /Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/dataset.json for MIND model and Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/ConfigDisplacementFieldUNet.json for UNet model** -> Za testiranje AMS podatkov je to ze vse nastimano in pripravljeno za uporabo
+Calculates the displacement field for segmented images using UNet.
+Parameters:
+    gpu_id: ID of the GPU to use.
+    convex_s: Index of the optimal settings from Convex optimization.
+    adam_s1: Index from the first Adam optimization step.
+    adam_s2: Index from the second Adam optimization step.
+    Both adam_s1 and adam_s2 are provided after Adam optimization
+```bash
+get_displacement_field_Unet
+```
+
+Calculates the displacement field for keypoint-based data using MIND descriptors.
+Parameters:
+    task: Task name. -> Can be whatever you want it to be
+    mind_r: Radius for MIND descriptors.
+    mind_d: Distance between voxel pairs for MIND descriptors.
+    use_mask: Whether to apply masks (True/False). -> Make sure to use if masks are available (Better results)
+    lambda_weight: Weight for regularization.
+    grid_sp: Downsampling factor.
+    disp_hw: Maximum displacement in voxels.
+    selected_niter: Number of iterations.
+    selected_smooth: Smoothness parameter. -> can be 3 or 5 (Defines filter size 3x3 or 5x5) 
+    mind_r, mind_d, grid_sp, disp_hw are parameters that are specified and also saved in results folder after optimization is completed
+```bash
+get_displacement_field_MIND
+```
+
+#### **6. Apply Displacement Field**
+Applies a precomputed displacement field to warp a moving image to align with a fixed image.
+Parameters:
+    path_to_fixed: Path to the fixed image.
+    path_to_moving: Path to the moving image.
+    path_to_displacement_field: Path to the displacement field.
+```bash
+apply_displacement_field
+```
+
+#### **7. Exit**
+Exit the program
+```bash
+exit
+```
+
+#### **8. Help**
+Display all the commands
+```
+help
+```
 
 ### **3. Configuration Files**
-It is important to include configuration files in the correct path. I have already provided some exaamples of it and you can run the code as it is.
+It is important to include configuration files in the correct path. I have already provided some examples of it and you can run the code as it is.
 
 1. UNet uses same config file for convex and adam optimization. It is provided at /Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/convex_config_unet.json
 Config file explained:
@@ -177,16 +261,18 @@ Only difference is that you have to input path to keypoints.
 Example available at Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/ConfigDisplacementFieldUNet.json
 Make sure to include yours in the same path
 
+**If you want to use ConvexAdam for AMS dataset registration use provided configuration files**
+
 ### **4 Example workflow**
-1. Run convex optimization (UNet)
+1. Run convex optimization (UNet) -> **Time needed to complete ~1h**
     ```bash
     convex_run_Unet
     Enter GPU ID: 0
     ```
     Scores will be saved in Results/UNet/optimized_params.pt
-    Function will also return index of best configuration make sure to use it in next step (convex_s)
+    Function will also return and display index of best configuration make sure to use it in next step (Input the index when convex_s parameter will be requested)
 
-2. Run Adam Optimization (UNet)
+2. Run Adam Optimization (UNet) -> **Time needed to complete ~70h**
     ```bash
     adam_run_Unet
     Enter GPU ID: 0
@@ -212,7 +298,11 @@ Make sure to include yours in the same path
     ```
     Warped image will be saved at Results/WarpedImages/
 
-Same workflow applies for MIND model. The parameters that i used for it are:
+Same workflow applies for MIND model.
+
+### OPTIMIZED PARAMETERS
+You can use the following parameters on AMS dataset if you want to skip optimization part and just run the command for getting displacement fields:
+#### MIND
 mind_r = 3
 mind_d = 3
 grid_sp = 3
@@ -222,6 +312,11 @@ grid_sp_adam = 3
 lambda_weight = 1
 selected_niter = 150
 selected_smooth = 5
+
+#### UNet
+convex_s = 77
+adam_s1 = 2
+adam_s2 = 15
 
 ### **5 Output Metrics**
 Output metrics will be calculated during convex and adam optimization and will be saved in the Results folder
@@ -233,6 +328,46 @@ Jacobian Determinant (jstd): Measures smoothness of deformation.
 2. MIND
 TRE: Target Registration Error between keypoints.
 Jacobian Determinant (jstd): Measures smoothness of deformation.
+
+### **6 Deformable-registration**
+The workfolw for obtaining the displacement fileds is already explained in the **4. Example workflow** and the parameters that i used are specified under the **OPTIMIZED PARAMETERS** title. The configuration files that I used for optimization are also available in /AMS_Challenge/Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23 folder (json files)
+After I got the displacement fileds I moved them from /Results/DisplacementFieldUNet/ to the input folder of the evaluation project that was provided. I modified the code of ConvexAdam so the displacement filed are correctly formated as requested by deformable-registration evaluation:
+```bash
+0011_0001<--0011_0000
+0012_0001<--0012_0000
+0013_0001<--0013_0000
+0011_0002<--0011_0000
+0012_0002<--0012_0000
+0013_0002<--0013_0000
+```
+After i build the image using:
+```bash
+docker build -t evaluation .
+```
+I ran the docker run command and got the evaluation results specified bellow:
+```bash
+docker run \
+    --rm \
+    -u $UID:$UID \
+    -v ./input:/input \
+    -v ./output:/output/ \
+    -v ./data:/workspace/data \
+    evaluation \
+    python evaluation.py -v
+```
+
+You can also use:
+```bash
+docker run \
+    --rm \
+    -u $UID:$UID \
+    -v ./input:path_to_convexAdam/Results/DisplacementFieldUNet/ \
+    -v ./output:/output/ \
+    -v ./data:/workspace/data \
+    evaluation \
+    python evaluation.py -v
+```
+This way you dont need to move displacement fields to input folder.
 
 # Results
 This document outlines the results of testing two different image registration models: 
