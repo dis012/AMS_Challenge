@@ -194,14 +194,14 @@ adam_run_MIND
 ```
 
 #### **5. Get Displacement fields**
-**The main functions you want to use for testing. Make sure the your configuration file is in /Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/dataset.json for MIND model and Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/ConfigDisplacementFieldUNet.json for UNet model** -> Za testiranje AMS podatkov je to ze vse nastimano in pripravljeno za uporabo
+**The main functions you want to use for testing. Make sure the configuration file is in /Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/dataset.json for MIND model and Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/ConfigDisplacementFieldUNet.json for UNet model** -> Za testiranje AMS podatkov je to ze vse nastimano in pripravljeno za uporabo
 Calculates the displacement field for segmented images using UNet.
-Parameters:
-    gpu_id: ID of the GPU to use.
-    convex_s: Index of the optimal settings from Convex optimization.
-    adam_s1: Index from the first Adam optimization step.
-    adam_s2: Index from the second Adam optimization step.
-    Both adam_s1 and adam_s2 are provided after Adam optimization
+Parameters:\
+    gpu_id: ID of the GPU to use.\
+    convex_s: Index of the optimal settings from Convex optimization.\
+    adam_s1: Index from the first Adam optimization step.\
+    adam_s2: Index from the second Adam optimization step.\
+    Both adam_s1 and adam_s2 are provided after Adam optimization.
 ```bash
 get_displacement_field_Unet
 ```
