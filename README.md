@@ -160,34 +160,34 @@ After you write one of the available commands the program will ask you to input 
 #### Available Commands
 
 #### **1. Convex optimization with UNet**
-Performs convex optimization on segmented images using UNet.
-Parameters:
+Performs convex optimization on segmented images using UNet.\
+Parameters:\
     gpu_id: ID of the GPU to use.
 ```bash
 convex_run_Unet
 ```
 
 #### **2. Adam Optimization with UNet**
-Refines displacement fields using Adam optimization for segmented images.
-Parameters:
-    gpu_id: ID of the GPU to use.
+Refines displacement fields using Adam optimization for segmented images.\
+Parameters:\
+    gpu_id: ID of the GPU to use.\
     convex_s: Index of the optimal settings from Convex optimization. -> The index is returned after convex_run_Unet is completed. It is also saved in the results folder
 ```bash
 adam_run_Unet
 ```
 
 #### **3. Convex Optimization with MIND**
-Performs convex optimization using MIND descriptors for multi-modal registration.
-Parameters:
+Performs convex optimization using MIND descriptors for multi-modal registration.\
+Parameters:\
     gpu_id: ID of the GPU to use.
 ```bash
 convex_run_MIND
 ```
 
 #### **4. Adam Optimization with MIND**
-Refines displacement fields using Adam optimization for MIND descriptors.
-Parameters:
-   gpu_id: ID of the GPU to use.
+Refines displacement fields using Adam optimization for MIND descriptors.\
+Parameters:\
+   gpu_id: ID of the GPU to use.\
    convex_s: Index of the optimal settings from the convex optimization step.
 ```bash
 adam_run_MIND
@@ -195,7 +195,7 @@ adam_run_MIND
 
 #### **5. Get Displacement fields**
 **The main functions you want to use for testing. Make sure the configuration file is in /Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/dataset.json for MIND model and Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/ConfigDisplacementFieldUNet.json for UNet model** -> Za testiranje AMS podatkov je to ze vse nastimano in pripravljeno za uporabo
-Calculates the displacement field for segmented images using UNet.
+Calculates the displacement field for segmented images using UNet.\
 Parameters:\
     gpu_id: ID of the GPU to use.\
     convex_s: Index of the optimal settings from Convex optimization.\
@@ -206,27 +206,27 @@ Parameters:\
 get_displacement_field_Unet
 ```
 
-Calculates the displacement field for keypoint-based data using MIND descriptors.
-Parameters:
-    task: Task name. -> Can be whatever you want it to be
-    mind_r: Radius for MIND descriptors.
-    mind_d: Distance between voxel pairs for MIND descriptors.
-    use_mask: Whether to apply masks (True/False). -> Make sure to use if masks are available (Better results)
-    lambda_weight: Weight for regularization.
-    grid_sp: Downsampling factor.
-    disp_hw: Maximum displacement in voxels.
-    selected_niter: Number of iterations.
-    selected_smooth: Smoothness parameter. -> can be 3 or 5 (Defines filter size 3x3 or 5x5) 
+Calculates the displacement field for keypoint-based data using MIND descriptors.\
+Parameters:\
+    task: Task name. -> Can be whatever you want it to be\
+    mind_r: Radius for MIND descriptors.\
+    mind_d: Distance between voxel pairs for MIND descriptors.\
+    use_mask: Whether to apply masks (True/False). -> Make sure to use if masks are available (Better results)\
+    lambda_weight: Weight for regularization.\
+    grid_sp: Downsampling factor.\
+    disp_hw: Maximum displacement in voxels.\
+    selected_niter: Number of iterations.\
+    selected_smooth: Smoothness parameter. -> can be 3 or 5 (Defines filter size 3x3 or 5x5)\
     mind_r, mind_d, grid_sp, disp_hw are parameters that are specified and also saved in results folder after optimization is completed
 ```bash
 get_displacement_field_MIND
 ```
 
 #### **6. Apply Displacement Field**
-Applies a precomputed displacement field to warp a moving image to align with a fixed image.
-Parameters:
-    path_to_fixed: Path to the fixed image.
-    path_to_moving: Path to the moving image.
+Applies a precomputed displacement field to warp a moving image to align with a fixed image.\
+Parameters:\
+    path_to_fixed: Path to the fixed image.\
+    path_to_moving: Path to the moving image.\
     path_to_displacement_field: Path to the displacement field.
 ```bash
 apply_displacement_field
