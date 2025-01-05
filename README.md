@@ -194,7 +194,7 @@ adam_run_MIND
 ```
 
 #### **5. Get Displacement fields**
-**The main functions you want to use for testing. Make sure the configuration file is in /Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/dataset.json for MIND model and Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/ConfigDisplacementFieldUNet.json for UNet model** -> Za testiranje AMS podatkov je to ze vse nastimano in pripravljeno za uporabo
+**The main functions you want to use for testing. Make sure the configuration file is in /Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/dataset.json for MIND model and Data/AMS_Images/ThoraxCBCT_OncoRegRelease_06_12_23/Release_06_12_23/ConfigDisplacementFieldUNet.json for UNet model** -> Za testiranje AMS podatkov je to ze vse nastimano in pripravljeno za uporabo\
 Calculates the displacement field for segmented images using UNet.\
 Parameters:\
     gpu_id: ID of the GPU to use.\
@@ -303,19 +303,19 @@ Same workflow applies for MIND model.
 ### OPTIMIZED PARAMETERS
 You can use the following parameters on AMS dataset if you want to skip optimization part and just run the command for getting displacement fields:
 #### MIND
-mind_r = 3
-mind_d = 3
-grid_sp = 3
-disp_hw = 5
-nn_mult = 5
-grid_sp_adam = 3
-lambda_weight = 1
-selected_niter = 150
+mind_r = 3\
+mind_d = 3\
+grid_sp = 3\
+disp_hw = 5\
+nn_mult = 5\
+grid_sp_adam = 3\
+lambda_weight = 1\
+selected_niter = 150\
 selected_smooth = 5
 
 #### UNet
-convex_s = 77
-adam_s1 = 2
+convex_s = 77\
+adam_s1 = 2\
 adam_s2 = 15
 
 ### **5 Output Metrics**
